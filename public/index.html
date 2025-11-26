@@ -9,11 +9,9 @@
     <title>Scramjet Hub</title>
 
     <link rel="shortcut icon" content="favicon.webp" />
-
-    <!-- Your existing CSS -->
     <link rel="stylesheet" href="index.css" />
 
-    <!-- Scramjet core – DO NOT TOUCH -->
+    <!-- Scramjet core – keep these -->
     <script src="/scram/scramjet.all.js"></script>
     <script src="baremux/index.js" defer></script>
     <script src="epoxy/index.js" defer></script>
@@ -21,147 +19,232 @@
     <script src="search.js" defer></script>
     <script src="index.js" defer></script>
 
-    <!-- Minimal inline styling for layout -->
     <style>
+      :root {
+        --bg: #050814;
+        --panel: #06091b;
+        --fg: #f9fafb;
+        --fg-dim: #9ca3af;
+        --accent: #3b82f6;
+        --header-h: 56px;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
       body {
         margin: 0;
         min-height: 100vh;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        background: #050814;
-        color: #f9fafb;
+        background: radial-gradient(circle at top, #0b1220 0, #020617 55%, #000 100%);
+        color: var(--fg);
         font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
           sans-serif;
       }
 
-      .hub {
-        width: 100%;
-        max-width: 600px;
-        padding: 20px;
+      /* HEADER */
+      .site-header {
+        position: sticky;
+        top: 0;
+        z-index: 50;
+        height: var(--header-h);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 18px;
+        background: rgba(3, 7, 18, 0.9);
+        backdrop-filter: blur(10px);
+        border-bottom: 1px solid rgba(148, 163, 184, 0.1);
       }
 
-      .hub-title {
-        text-align: center;
-        margin-bottom: 24px;
-        font-size: 20px;
+      .site-title {
+        font-size: 15px;
         font-weight: 600;
       }
 
-      /* search bar */
+      .site-title span {
+        opacity: 0.6;
+        font-weight: 400;
+        font-size: 12px;
+        margin-left: 4px;
+      }
+
+      .site-nav {
+        display: flex;
+        gap: 10px;
+        font-size: 13px;
+      }
+
+      .site-nav a {
+        text-decoration: none;
+        padding: 6px 10px;
+        border-radius: 999px;
+        border: 1px solid transparent;
+        color: var(--fg-dim);
+        cursor: pointer;
+        transition: 0.15s ease;
+      }
+
+      .site-nav a:hover {
+        border-color: rgba(148, 163, 184, 0.4);
+        color: var(--fg);
+        background: rgba(15, 23, 42, 0.8);
+      }
+
+      .site-nav a.active {
+        border-color: rgba(59, 130, 246, 0.8);
+        background: rgba(37, 99, 235, 0.35);
+        color: var(--fg);
+      }
+
+      /* MAIN LAYOUT */
+      .page {
+        min-height: calc(100vh - var(--header-h));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px 16px 32px;
+      }
+
+      .hub-card {
+        width: 100%;
+        max-width: 640px;
+        padding: 24px 20px 20px;
+        border-radius: 18px;
+        background: radial-gradient(circle at top left, #111827 0, #020617 60%);
+        border: 1px solid rgba(148, 163, 184, 0.18);
+        box-shadow: 0 24px 80px rgba(0, 0, 0, 0.8);
+      }
+
+      .hub-heading {
+        margin-bottom: 14px;
+        font-size: 18px;
+        font-weight: 600;
+      }
+
+      .hub-sub {
+        margin: 0 0 20px;
+        font-size: 13px;
+        color: var(--fg-dim);
+      }
+
+      /* SEARCH */
       #sj-form {
         display: flex;
-        justify-content: center;
+        margin-bottom: 10px;
       }
 
       #sj-address {
         width: 100%;
-        max-width: 600px;
         padding: 14px 16px;
-        border-radius: 10px;
+        border-radius: 999px;
         border: none;
         outline: none;
         font-size: 15px;
-        background: #0b1020;
-        color: #f9fafb;
+        color: var(--fg);
+        background: rgba(15, 23, 42, 0.95);
+        box-shadow: inset 0 0 0 1px rgba(148, 163, 184, 0.4);
       }
 
       #sj-address::placeholder {
         color: #6b7280;
       }
 
-      /* nav row */
-      .hub-nav {
-        margin-top: 18px;
-        display: flex;
-        justify-content: center;
-        gap: 10px;
-        flex-wrap: wrap;
-      }
-
-      .hub-nav button {
-        border: 1px solid #1f2933;
-        background: #0b1020;
-        color: #f9fafb;
-        padding: 8px 14px;
-        border-radius: 999px;
-        font-size: 13px;
-        cursor: pointer;
-        transition: transform 0.15s ease, background 0.15s ease;
-      }
-
-      .hub-nav button:hover {
-        transform: scale(1.05);
-        background: #111827;
-      }
-
-      /* error area – keep for Scramjet */
+      /* ERROR AREA */
       .error-wrap {
-        margin-top: 12px;
-        font-size: 12px;
-        color: #f97373;
+        min-height: 18px;
+        margin-top: 6px;
+        font-size: 11px;
+        color: #fda4af;
         white-space: pre-wrap;
       }
 
-      footer {
-        margin-top: 32px;
+      #sj-error-code {
+        margin: 4px 0 0;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+          "Liberation Mono", "Courier New", monospace;
         font-size: 11px;
-        opacity: 0.5;
-        text-align: center;
+        color: #fda4af;
       }
 
-      footer a {
+      .footer {
+        margin-top: 12px;
+        font-size: 11px;
+        color: #6b7280;
+        display: flex;
+        justify-content: space-between;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+
+      .footer a {
         color: #9ca3af;
         text-decoration: none;
-        margin: 0 4px;
+        margin-right: 6px;
       }
 
-      footer a:hover {
+      .footer a:hover {
         text-decoration: underline;
       }
     </style>
   </head>
 
   <body>
-    <div class="hub">
-      <!-- Tiny title, no big logo / description -->
-      <div class="hub-title">Scramjet Gaming Hub</div>
-
-      <!-- SEARCH BAR (must keep IDs for search.js) -->
-      <form id="sj-form">
-        <input
-          id="sj-search-engine"
-          value="https://www.google.com/search?q=%s"
-          type="hidden"
-        />
-        <input
-          id="sj-address"
-          type="text"
-          placeholder="Search the web freely..."
-        />
-      </form>
-
-      <!-- SIMPLE NAVBAR -->
-      <div class="hub-nav">
-        <button type="button" onclick="location.href='/games'">Games</button>
-        <button type="button" onclick="location.href='/'">Proxy</button>
-        <button type="button" onclick="location.href='/chat'">Chat</button>
-        <button type="button" onclick="location.href='/settings'">Settings</button>
+    <header class="site-header">
+      <div class="site-title">
+        Scramjet Hub <span>proxy · games · chat</span>
       </div>
+      <nav class="site-nav">
+        <a href="index.html" class="active">Proxy</a>
+        <a href="games.html">Games</a>
+        <a href="chat.html">Chat</a>
+        <a href="settings.html">Settings</a>
+      </nav>
+    </header>
 
-      <!-- ERROR OUTPUT (keep these IDs – used by scripts) -->
-      <div class="error-wrap">
-        <p id="sj-error"></p>
-        <pre id="sj-error-code"></pre>
-      </div>
+    <main class="page">
+      <section class="hub-card">
+        <h1 class="hub-heading">Search the web through Scramjet</h1>
+        <p class="hub-sub">
+          Type a URL or search term and press Enter. Traffic is routed through Scramjet.
+        </p>
 
-      <!-- Small footer (optional, can delete if you want) -->
-      <footer>
-        <div>
-          <span>Scramjet &copy; MW 2025</span>
+        <!-- Scramjet search – IDs MUST stay the same -->
+        <form id="sj-form">
+          <input
+            id="sj-search-engine"
+            value="https://www.google.com/search?q=%s"
+            type="hidden"
+          />
+          <input
+            id="sj-address"
+            type="text"
+            placeholder="https://example.com or search the web..."
+          />
+        </form>
+
+        <div class="error-wrap">
+          <p id="sj-error"></p>
+          <pre id="sj-error-code"></pre>
         </div>
-      </footer>
-    </div>
+
+        <div class="footer">
+          <div>
+            <a
+              title="The Mercury Workshop GitHub organization"
+              href="https://github.com/MercuryWorkshop"
+              >Mercury Workshop</a
+            >
+            <a
+              title="The example demo app for Scramjet"
+              href="https://github.com/MercuryWorkshop/Scramjet-Demo"
+              >GitHub</a
+            >
+            <a title="License information" href="credits.html">Credits</a>
+          </div>
+          <div>Scramjet &copy; MW 2025</div>
+        </div>
+      </section>
+    </main>
   </body>
 </html>

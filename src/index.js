@@ -5,8 +5,12 @@ import { server as wisp, logging } from "@mercuryworkshop/wisp-js/server";
 import Fastify from "fastify";
 import fastifyStatic from "@fastify/static";
 
-// NEW: Import the Bare-Mux server
-import { createBareServer } from "@mercuryworkshop/bare-mux/node";
+// --- THIS IS THE FIX ---
+// The old line was: import { createBareServer } from "@mercuryworkshop/bare-mux/node";
+// The error log told us to do this instead:
+import pkg from '@mercuryworkshop/bare-mux/node';
+const { createBareServer } = pkg;
+// --- END OF FIX ---
 
 import { scramjetPath } from "@mercuryworkshop/scramjet/path";
 import { epoxyPath } from "@mercuryworkshop/epoxy-transport";

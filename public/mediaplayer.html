@@ -115,13 +115,8 @@
         white-space: nowrap;
       }
 
-      .player-actions {
-        display: flex;
-        gap: 8px;
-      }
-
-      .player-actions button,
-      .player-actions a {
+      .player-actions a,
+      .player-actions button {
         font-size: 12px;
         border-radius: 999px;
         border: 1px solid rgba(148, 163, 184, 0.4);
@@ -173,10 +168,10 @@
   <body>
     <header class="site-header">
       <div class="site-title">
-        S0LACE 
+        S0LACE <span>player</span>
       </div>
       <nav class="site-nav">
-        <a href="index.html">Home</a>
+        <a href="index.html">Proxy</a>
         <a href="games.html">Games</a>
         <a href="media.html" class="active">Media</a>
         <a href="settings.html">Settings</a>
@@ -188,17 +183,12 @@
         <div class="player-left" id="media-title">Loading…</div>
         <div class="player-actions">
           <button type="button" id="reload-btn">Reload</button>
-          <button type="button" id="fullscreen-btn">Fullscreen</button>
-          <a href="media.html">Back</a>
+          <a href="media.html">Back to Media</a>
         </div>
       </div>
 
       <div class="player-frame-wrap" id="frame-wrap">
-        <iframe
-          id="media-frame"
-          allowfullscreen
-          referrerpolicy="no-referrer"
-        ></iframe>
+        <iframe id="media-frame"></iframe>
       </div>
 
       <div class="no-src" id="no-src-msg" style="display: none;">
@@ -209,7 +199,7 @@
 
     <script>
       const params = new URLSearchParams(window.location.search);
-      const srcParam = params.get("src");
+      const srcParam = params.get("src"); // original URL (not proxied yet)
       const titleParam = params.get("title");
 
       const frame = document.getElementById("media-frame");
@@ -217,73 +207,33 @@
       const noSrc = document.getElementById("no-src-msg");
       const titleEl = document.getElementById("media-title");
       const reloadBtn = document.getElementById("reload-btn");
-      const fullscreenBtn = document.getElementById("fullscreen-btn");
 
       let originalSrc = null;
 
+      function buildProxiedUrl(original) {
+        // CHANGE THIS if your Scramjet route is different
+        // e.g. "/scramjet/" or "/proxy/"
+        return "/scramjet/" + original;
+      }
+
       if (srcParam) {
         originalSrc = decodeURIComponent(srcParam);
-        const title = titleParam ? decodeURIComponent(titleParam) : originalSrc;
-        titleEl.textContent = title;
-        frame.src = originalSrc;
+        const displayTitle = titleParam ? decodeURIComponent(titleParam) : originalSrc;
+        titleEl.textContent = displayTitle;
+
+        const proxied = buildProxiedUrl(originalSrc);
+        frame.src = proxied;
       } else {
         wrap.style.display = "none";
         noSrc.style.display = "flex";
         titleEl.textContent = "No media loaded";
         reloadBtn.disabled = true;
-        fullscreenBtn.disabled = true;
       }
 
       reloadBtn.addEventListener("click", () => {
         if (!originalSrc) return;
-        frame.src = originalSrc;
-      });
-
-      // Fullscreen handling
-      function isFullscreen() {
-        return !!(
-          document.fullscreenElement ||
-          document.webkitFullscreenElement ||
-          document.mozFullScreenElement ||
-          document.msFullscreenElement
-        );
-      }
-
-      function requestFs(el) {
-        if (el.requestFullscreen) return el.requestFullscreen();
-        if (el.webkitRequestFullscreen) return el.webkitRequestFullscreen();
-        if (el.mozRequestFullScreen) return el.mozRequestFullScreen();
-        if (el.msRequestFullscreen) return el.msRequestFullscreen();
-      }
-
-      function exitFs() {
-        if (document.exitFullscreen) return document.exitFullscreen();
-        if (document.webkitExitFullscreen) return document.webkitExitFullscreen();
-        if (document.mozCancelFullScreen) return document.mozCancelFullScreen();
-        if (document.msExitFullscreen) return document.msExitFullscreen();
-      }
-
-      fullscreenBtn.addEventListener("click", () => {
-        if (!wrap) return;
-
-        if (!isFullscreen()) {
-          requestFs(wrap);
-        } else {
-          exitFs();
-        }
-      });
-
-      document.addEventListener("fullscreenchange", () => {
-        fullscreenBtn.textContent = isFullscreen() ? "Exit Fullscreen" : "Fullscreen";
-      });
-      document.addEventListener("webkitfullscreenchange", () => {
-        fullscreenBtn.textContent = isFullscreen() ? "Exit Fullscreen" : "Fullscreen";
-      });
-      document.addEventListener("mozfullscreenchange", () => {
-        fullscreenBtn.textContent = isFullscreen() ? "Exit Fullscreen" : "Fullscreen";
-      });
-      document.addEventListener("MSFullscreenChange", () => {
-        fullscreenBtn.textContent = isFullscreen() ? "Exit Fullscreen" : "Fullscreen";
+        const proxied = buildProxiedUrl(originalSrc);
+        frame.src = proxied;
       });
     </script>
   </body>

@@ -6,184 +6,17 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0, shrink-to-fit=no"
     />
-    <title>S0LACE • Player</title>
+    <title>S0LACE • Media Player</title>
 
-    <link rel="shortcut icon" content="favicon.webp" />
+    <link rel="shortcut icon" content="favicon.ico" />
     <link rel="stylesheet" href="index.css" />
     <script src="global-hub.js" defer></script>
-
-    <style>
-      :root {
-        --bg: #050814;
-        --panel: #020617;
-        --fg: #f9fafb;
-        --fg-dim: #9ca3af;
-        --accent: #3b82f6;
-        --header-h: 56px;
-      }
-
-      * {
-        box-sizing: border-box;
-      }
-
-      html,
-      body {
-        height: 100%;
-      }
-
-      body {
-        margin: 0;
-        min-height: 100vh;
-        background: radial-gradient(circle at top, #0b1220 0, #020617 55%, #000 100%);
-        color: var(--fg);
-        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-          sans-serif;
-        display: flex;
-        flex-direction: column;
-      }
-
-      .site-header {
-        position: sticky;
-        top: 0;
-        z-index: 50;
-        height: var(--header-h);
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 0 18px;
-        background: rgba(3, 7, 18, 0.9);
-        backdrop-filter: blur(10px);
-        border-bottom: 1px solid rgba(148, 163, 184, 0.1);
-      }
-
-      .site-title {
-        font-size: 15px;
-        font-weight: 600;
-      }
-
-      .site-title span {
-        opacity: 0.6;
-        font-weight: 400;
-        font-size: 12px;
-        margin-left: 4px;
-      }
-
-      .site-nav {
-        display: flex;
-        gap: 10px;
-        font-size: 13px;
-      }
-
-      .site-nav a {
-        text-decoration: none;
-        padding: 6px 10px;
-        border-radius: 999px;
-        border: 1px solid transparent;
-        color: var(--fg-dim);
-        cursor: pointer;
-        transition: 0.15s ease;
-      }
-
-      .site-nav a:hover {
-        border-color: rgba(148, 163, 184, 0.4);
-        color: var(--fg);
-        background: rgba(15, 23, 42, 0.8);
-      }
-
-      .site-nav a.active {
-        border-color: rgba(59, 130, 246, 0.8);
-        background: rgba(37, 99, 235, 0.35);
-        color: var(--fg);
-      }
-
-      main {
-        flex: 1;
-        padding: 12px 10px 12px;
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-        min-height: 0;
-        max-width: 1100px;
-        margin: 0 auto;
-        width: 100%;
-      }
-
-      .player-info {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        font-size: 13px;
-        padding: 0 4px;
-        color: var(--fg-dim);
-        gap: 10px;
-      }
-
-      .player-left {
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-      }
-
-      .player-actions {
-        display: flex;
-        gap: 8px;
-      }
-
-      .player-actions button,
-      .player-actions a {
-        font-size: 12px;
-        border-radius: 999px;
-        border: 1px solid rgba(148, 163, 184, 0.4);
-        background: rgba(15, 23, 42, 0.9);
-        color: var(--fg);
-        padding: 4px 10px;
-        cursor: pointer;
-        text-decoration: none;
-        display: inline-flex;
-        align-items: center;
-        gap: 4px;
-      }
-
-      .player-actions button:hover,
-      .player-actions a:hover {
-        background: rgba(37, 99, 235, 0.3);
-        border-color: rgba(59, 130, 246, 0.9);
-      }
-
-      .player-frame-wrap {
-        flex: 1;
-        min-height: 0;
-        border-radius: 14px;
-        overflow: hidden;
-        border: 1px solid rgba(148, 163, 184, 0.2);
-        background: #020617;
-        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
-      }
-
-      #media-frame {
-        width: 100%;
-        height: 100%;
-        border: none;
-        display: block;
-      }
-
-      .no-src {
-        flex: 1;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 14px;
-        color: var(--fg-dim);
-        text-align: center;
-        padding: 20px;
-      }
-    </style>
   </head>
 
   <body>
     <header class="site-header">
       <div class="site-title">
-        S0LACE <span>player</span>
+        S0LACE
       </div>
       <nav class="site-nav">
         <a href="index.html">Home</a>
@@ -194,27 +27,21 @@
       </nav>
     </header>
 
-    <main>
+    <main class="player-main">
       <div class="player-info">
-        <div class="player-left" id="media-title">Loading…</div>
+        <div class="player-left" id="media-title">Loading media…</div>
         <div class="player-actions">
-          <button type="button" id="reload-btn">Reload</button>
-          <button type="button" id="fullscreen-btn">Fullscreen</button>
-          <a href="media.html">Back</a>
+          <button type="button" id="reload-btn">↻</button>
+          <button type="button" id="fullscreen-btn">⌞ ⌝ </button>
         </div>
       </div>
 
       <div class="player-frame-wrap" id="frame-wrap">
-        <iframe
-          id="media-frame"
-          allowfullscreen
-          referrerpolicy="no-referrer"
-        ></iframe>
+        <iframe id="media-frame" allowfullscreen></iframe>
       </div>
 
       <div class="no-src" id="no-src-msg" style="display: none;">
         No media URL provided.<br />
-        Go back to the <a href="media.html">media library</a> and pick something.
       </div>
     </main>
 
@@ -232,11 +59,11 @@
 
       let originalSrc = null;
 
-      // srcParam is whatever you passed from media.html
-      // e.g. /scramjet/https://cinemaos.tech/player/157336
       if (srcParam) {
         originalSrc = decodeURIComponent(srcParam);
-        const title = titleParam ? decodeURIComponent(titleParam) : originalSrc;
+        const title = titleParam
+          ? decodeURIComponent(titleParam)
+          : originalSrc;
         titleEl.textContent = title;
         frame.src = originalSrc;
       } else {
@@ -252,7 +79,6 @@
         frame.src = originalSrc;
       });
 
-      // ---------- Fullscreen handling ----------
       function isFullscreen() {
         return !!(
           document.fullscreenElement ||
@@ -278,7 +104,6 @@
 
       fullscreenBtn.addEventListener("click", () => {
         if (!wrap) return;
-
         if (!isFullscreen()) {
           requestFs(wrap);
         } else {

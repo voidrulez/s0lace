@@ -17,7 +17,6 @@
     <header class="site-header">
       <div class="site-title">
         S0LACE
-        <span>black dungeon // settings</span>
       </div>
       <nav class="site-nav">
         <a href="index.html">Home</a>
@@ -31,20 +30,12 @@
     <main>
       <div class="page-header">
         <h1>Settings</h1>
-        <p class="sub">
-          Cloak your <span>tab identity</span> and tweak the dungeon’s
-          highlight color.
-        </p>
       </div>
 
       <!-- TAB CLOAKING -->
       <section class="home-panel" style="margin-bottom: 16px;">
         <div class="motd-label">TAB CLOAKING</div>
 
-        <p class="sub">
-          Changes the tab title + icon so it looks like something less
-          suspicious.
-        </p>
 
         <!-- Presets -->
         <div style="margin-top: 10px; font-size: 8px;">
@@ -53,14 +44,14 @@
             <button type="button" class="proxy-btn" data-cloak-preset="drive">
               Google Drive
             </button>
-            <button type="button" class="proxy-btn" data-cloak-preset="classroom">
-              Google Classroom
+            <button type="button" class="proxy-btn" data-cloak-preset="original">
+              S0LACE
             </button>
             <button type="button" class="proxy-btn" data-cloak-preset="docs">
               Google Docs
             </button>
-            <button type="button" class="proxy-btn" data-cloak-preset="desmos">
-              Desmos
+            <button type="button" class="proxy-btn" data-cloak-preset="google">
+              Google
             </button>
           </div>
         </div>
@@ -102,7 +93,7 @@
               />
             </label>
             <label>
-              Favicon URL (optional)<br />
+              Favicon URL <br />
               <input
                 id="cloak-icon"
                 type="text"
@@ -138,10 +129,6 @@
       <!-- ACCENT / THEME -->
       <section class="home-panel">
         <div class="motd-label">ACCENT COLOR</div>
-        <p class="sub">
-          The dungeon is always black, but you can change the
-          <span>highlight glow</span>.
-        </p>
 
         <div style="margin-top: 10px; font-size: 8px;">
           <label style="display: flex; align-items: center; gap: 6px;">
@@ -152,7 +139,7 @@
               class="accent-radio"
               checked
             />
-            Neon green (default)
+             green (default)
           </label>
 
           <label style="display: flex; align-items: center; gap: 6px;">
@@ -162,7 +149,7 @@
               value="violet"
               class="accent-radio"
             />
-            Arcane violet
+           violet
           </label>
 
           <label style="display: flex; align-items: center; gap: 6px;">
@@ -172,7 +159,7 @@
               value="amber"
               class="accent-radio"
             />
-            Warning amber
+             amber
           </label>
         </div>
       </section>
@@ -195,19 +182,19 @@
           iconHref:
             "https://ssl.gstatic.com/docs/doclist/images/drive_2022q3_32dp.png",
         },
-        classroom: {
-          title: "Classes",
+        original: {
+          title: "S0LACE",
           iconHref:
-            "https://ssl.gstatic.com/classroom/ic_product_classroom_32.png",
+            "favicon.ico",
         },
         docs: {
           title: "Document - Google Docs",
           iconHref:
             "https://ssl.gstatic.com/docs/documents/images/kix-favicon7.ico",
         },
-        desmos: {
-          title: "Desmos | Graphing Calculator",
-          iconHref: "https://www.desmos.com/assets/img/apps/graphing/favicon.ico",
+        google: {
+          title: "Google",
+          iconHref: "favicon.ico",
         },
       };
 

@@ -1,51 +1,326 @@
-/* ============================================================
-   FIXED GAMES PAGE — CLEAN 8 PER ROW, NORMAL SIZED ICONS
-   ============================================================ */
+@import url("https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap");
 
-/* force games grid to behave */
-body.games-page .game-grid {
-  display: grid !important;
-  grid-template-columns: repeat(8, 1fr) !important;
-  gap: 14px !important;
-  padding-top: 10px !important;
+/* ========= ROOT / GLOBAL ========= */
+
+:root {
+  --bg: #000000;
+  --bg-soft: #050505;
+  --panel: #080808;
+  --panel-alt: #101010;
+  --fg: #f5f5f5;
+  --fg-dim: #7f7f7f;
+  --accent: #00ff7f;
+  --accent-soft: rgba(0, 255, 127, 0.12);
+  --border-hard: #262626;
+  --header-h: 56px;
 }
 
-/* card size normalized */
-body.games-page .game-card {
-  width: 100% !important;
-  max-width: 110px !important;
-  padding: 6px !important;
-  border: 2px solid #262626 !important;
-  background: #080808 !important;
+* {
+  box-sizing: border-box;
 }
 
-/* perfect square thumbnails */
-body.games-page .game-thumb {
-  width: 100% !important;
-  aspect-ratio: 1 / 1 !important;
-  height: auto !important;
-  overflow: hidden !important;
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
 }
 
-body.games-page .game-thumb img {
-  width: 100% !important;
-  height: 100% !important;
-  object-fit: cover !important;
-  image-rendering: pixelated !important;
+body {
+  min-height: 100vh;
+  background-color: var(--bg);
+  color: var(--fg);
+  font-family: "Press Start 2P", system-ui, sans-serif;
+  font-size: 10px;
+  letter-spacing: 0.04em;
+
+  background-image:
+    linear-gradient(rgba(10, 10, 10, 0.9), rgba(10, 10, 10, 0.9)),
+    repeating-linear-gradient(
+      to right,
+      rgba(255, 255, 255, 0.03) 0,
+      rgba(255, 255, 255, 0.03) 1px,
+      transparent 1px,
+      transparent 16px
+    ),
+    repeating-linear-gradient(
+      to bottom,
+      rgba(255, 255, 255, 0.03) 0,
+      rgba(255, 255, 255, 0.03) 1px,
+      transparent 1px,
+      transparent 16px
+    );
+
+  display: flex;
+  flex-direction: column;
 }
 
-/* overlay stays small */
-body.games-page .game-overlay {
-  font-size: 8px !important;
+a {
+  color: inherit;
 }
 
-/* ensure header goes back to normal */
-body.games-page .site-header {
-  position: sticky !important;
-  display: flex !important;
+/* ========= HEADER ========= */
+
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  height: var(--header-h);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 14px;
+  background: rgba(0, 0, 0, 0.98);
+  border-bottom: 3px solid var(--border-hard);
+  box-shadow: 0 0 0 1px #000, 0 6px 0 #000, 0 0 24px rgba(0, 255, 127, 0.2);
 }
 
-/* remove ALL old media queries that were messing it up */
-body.games-page * {
-  max-width: none !important;
+.site-title {
+  font-size: 11px;
+  text-transform: uppercase;
+  color: var(--accent);
+  text-shadow: 0 0 6px rgba(0, 255, 127, 0.7);
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.site-title span {
+  font-size: 8px;
+  color: var(--fg-dim);
+}
+
+.site-nav {
+  display: flex;
+  gap: 6px;
+  font-size: 8px;
+}
+
+.site-nav a {
+  text-decoration: none;
+  padding: 4px 8px;
+  border: 2px solid transparent;
+  cursor: pointer;
+}
+
+.site-nav a:hover {
+  color: var(--fg);
+  border-color: var(--accent);
+}
+
+.site-nav a.active {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* ========= MAIN ========= */
+
+main {
+  padding: 18px 12px 32px;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+  flex: 1;
+}
+
+/* ========= PAGE HEADER ========= */
+
+.page-header {
+  margin-bottom: 18px;
+}
+
+h1 {
+  font-size: 14px;
+  margin: 0;
+  text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+h1::before,
+h1::after {
+  content: "█";
+  color: var(--accent);
+  font-size: 12px;
+}
+
+/* ========= SEARCH BARS ========= */
+
+.games-search-wrap,
+.app-search-wrap,
+.media-search-wrap {
+  margin: 10px 0 18px;
+  padding: 8px;
+  border: 2px solid var(--border-hard);
+  background: #101010;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.search-label {
+  font-size: 8px;
+  color: var(--fg-dim);
+}
+
+#game-search,
+#media-search,
+#app-search {
+  flex: 1;
+  padding: 7px 10px;
+  border: 2px solid var(--border-hard);
+  background: #000;
+  color: var(--fg);
+  font-size: 9px;
+  outline: none;
+}
+
+#game-search:focus,
+#media-search:focus,
+#app-search:focus {
+  border-color: var(--accent);
+}
+
+/* ========= GRID BASE ========= */
+
+.game-grid,
+.app-grid,
+.media-grid {
+  display: grid;
+  gap: 14px;
+}
+
+/* THE IMPORTANT FIX — 8 COL FOR GAMES, 6 FOR OTHERS */
+
+.game-grid {
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+}
+
+.app-grid,
+.media-grid {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+}
+
+/* ========= CARDS ========= */
+
+.game-card,
+.app-card,
+.media-card {
+  background: var(--panel);
+  border: 2px solid var(--border-hard);
+  padding: 6px;
+  cursor: pointer;
+  text-decoration: none;
+  position: relative;
+}
+
+.game-thumb,
+.app-thumb {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+}
+
+.poster-thumb {
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  overflow: hidden;
+}
+
+.game-thumb img,
+.app-thumb img,
+.poster-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  image-rendering: pixelated;
+}
+
+.game-overlay,
+.app-overlay,
+.media-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.8);
+  color: var(--accent);
+  opacity: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.game-card:hover .game-overlay,
+.app-card:hover .app-overlay,
+.media-card:hover .media-overlay {
+  opacity: 1;
+}
+
+/* ========= POPULAR STRIP ========= */
+
+.popular-wrap {
+  overflow: hidden;
+  border: 2px solid var(--border-hard);
+}
+
+.popular-track {
+  display: flex;
+  gap: 10px;
+  width: max-content;
+  animation: popular-scroll 26s linear infinite;
+}
+
+@keyframes popular-scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.popular-pill {
+  width: 96px;
+  height: 96px;
+  border: 2px solid var(--border-hard);
+  position: relative;
+  overflow: hidden;
+}
+
+.pill-thumb {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+}
+
+.pill-name {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.82);
+  opacity: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: var(--accent);
+}
+
+.popular-pill:hover .pill-name {
+  opacity: 1;
+}
+
+/* ========= PLAYER ========= */
+
+.player-frame-wrap {
+  flex: 1;
+  border: 2px solid var(--border-hard);
+  background: #020617;
+}
+
+#media-frame,
+#game-frame {
+  width: 100%;
+  height: 100%;
+  border: none;
 }

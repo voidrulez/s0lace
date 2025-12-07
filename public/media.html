@@ -28,10 +28,6 @@
     <main>
       <div class="page-header">
         <h1>Media</h1>
-        <div class="sub">
-          TMDB-powered browser.
-          search for any movie or show below.
-        </div>
       </div>
 
       <!-- SEARCH BAR (HORIZONTAL) -->
@@ -45,18 +41,9 @@
         />
       </div>
 
-      <!-- STATUS LINES -->
-      <div
-        id="tmdb-status-movies"
-        style="font-size: 9px; color: #7f7f7f; margin: 4px 0 6px;"
-      >
-        Loading popular movies from TMDB…
-      </div>
-
       <!-- MOVIES SECTION -->
       <section class="media-section">
-        <div class="sub" style="margin-bottom: 6px;">
-        </div>
+        <h2 class="media-section-title">Movies</h2>
         <div class="media-grid" id="movies-grid"></div>
         <div
           id="media-empty-movies"
@@ -68,22 +55,15 @@
 
       <hr style="border:0; border-top:1px solid #222; margin: 20px 0;" />
 
-      <div
-        id="tmdb-status-tv"
-        style="font-size: 9px; color: #7f7f7f; margin: 4px 0 6px;"
-      >
-        Loading popular TV shows from TMDB…
-      </div>
-
       <!-- TV SECTION -->
       <section class="media-section">
-        <div class="sub" style="margin-bottom: 6px;">
+        <h2 class="media-section-title">Shows</h2>
         <div class="media-grid" id="tv-grid"></div>
         <div
           id="media-empty-tv"
           style="display:none; font-size: 8px; color:#7f7f7f; margin-top:8px;"
         >
-          No TV shows found.
+          No shows found.
         </div>
       </section>
     </main>
@@ -98,11 +78,9 @@
 
       const moviesGrid = document.getElementById("movies-grid");
       const moviesEmpty = document.getElementById("media-empty-movies");
-      const statusMovies = document.getElementById("tmdb-status-movies");
 
       const tvGrid = document.getElementById("tv-grid");
       const tvEmpty = document.getElementById("media-empty-tv");
-      const statusTv = document.getElementById("tmdb-status-tv");
 
       // ===== NAV HELPERS =====
 
@@ -110,7 +88,8 @@
       function goToMoviePlayer(tmdbId, title) {
         if (!tmdbId) return;
         const src =
-          "/scramjet/https://cinemaos.tech/player/" + encodeURIComponent(tmdbId);
+          "/scramjet/https://cinemaos.tech/player/" +
+          encodeURIComponent(tmdbId);
 
         const url =
           "mediaplayer.html?src=" +
@@ -217,17 +196,12 @@
 
       function clearTmdbCardsInGrid(gridEl, className) {
         if (!gridEl) return;
-        gridEl
-          .querySelectorAll("." + className)
-          .forEach((el) => el.remove());
+        gridEl.querySelectorAll("." + className).forEach((el) => el.remove());
       }
 
       // ===== TRENDING LOADERS =====
 
       async function loadTrendingMovies() {
-        if (!statusMovies) return;
-        statusMovies.textContent = "Loading trending movies…";
-
         try {
           const res = await fetch(
             `https://api.themoviedb.org/3/trending/movie/day?api_key=${TMDB_KEY}&language=en-US`
@@ -241,7 +215,7 @@
           if (moviesEmpty) moviesEmpty.style.display = "none";
 
           if (!results.length) {
-            statusMovies.textContent = "No trending movies found.";
+            if (moviesEmpty) moviesEmpty.style.display = "block";
             return;
           }
 
@@ -251,17 +225,13 @@
           });
 
           moviesGrid.appendChild(fragment);
-          statusMovies.textContent = "Trending movies from TMDB.";
         } catch (err) {
-          console.error(err);
-          statusMovies.textContent = "TMDB movie error: " + err.message;
+          console.error("TMDB movie error", err);
+          if (moviesEmpty) moviesEmpty.style.display = "block";
         }
       }
 
       async function loadTrendingTv() {
-        if (!statusTv) return;
-        statusTv.textContent = "Loading trending TV shows…";
-
         try {
           const res = await fetch(
             `https://api.themoviedb.org/3/trending/tv/day?api_key=${TMDB_KEY}&language=en-US`
@@ -275,7 +245,7 @@
           if (tvEmpty) tvEmpty.style.display = "none";
 
           if (!results.length) {
-            statusTv.textContent = "No trending TV shows found.";
+            if (tvEmpty) tvEmpty.style.display = "block";
             return;
           }
 
@@ -285,10 +255,9 @@
           });
 
           tvGrid.appendChild(fragment);
-          statusTv.textContent = "Trending TV shows from TMDB.";
         } catch (err) {
-          console.error(err);
-          statusTv.textContent = "TMDB TV error: " + err.message;
+          console.error("TMDB TV error", err);
+          if (tvEmpty) tvEmpty.style.display = "block";
         }
       }
 
@@ -300,8 +269,6 @@
           await loadTrendingMovies();
           return;
         }
-
-        if (statusMovies) statusMovies.textContent = `Searching movies for "${q}"…`;
 
         try {
           const res = await fetch(
@@ -318,7 +285,6 @@
 
           if (!results.length) {
             if (moviesEmpty) moviesEmpty.style.display = "block";
-            statusMovies.textContent = `No movie results for "${q}".`;
             return;
           }
 
@@ -330,10 +296,9 @@
           });
 
           moviesGrid.appendChild(fragment);
-          statusMovies.textContent = `Movie results for "${q}".`;
         } catch (err) {
-          console.error(err);
-          statusMovies.textContent = "TMDB movie search error: " + err.message;
+          console.error("TMDB movie search error", err);
+          if (moviesEmpty) moviesEmpty.style.display = "block";
         }
       }
 
@@ -343,8 +308,6 @@
           await loadTrendingTv();
           return;
         }
-
-        if (statusTv) statusTv.textContent = `Searching TV for "${q}"…`;
 
         try {
           const res = await fetch(
@@ -361,7 +324,6 @@
 
           if (!results.length) {
             if (tvEmpty) tvEmpty.style.display = "block";
-            statusTv.textContent = `No TV results for "${q}".`;
             return;
           }
 
@@ -373,10 +335,9 @@
           });
 
           tvGrid.appendChild(fragment);
-          statusTv.textContent = `TV results for "${q}".`;
         } catch (err) {
-          console.error(err);
-          statusTv.textContent = "TMDB TV search error: " + err.message;
+          console.error("TMDB TV search error", err);
+          if (tvEmpty) tvEmpty.style.display = "block";
         }
       }
 
@@ -390,7 +351,7 @@
           mediaSearch.addEventListener("keyup", (e) => {
             if (e.key === "Enter") {
               const q = mediaSearch.value || "";
-              // A2: one search bar controls BOTH sections
+              // one search bar controls BOTH sections
               searchMovies(q);
               searchTv(q);
             }

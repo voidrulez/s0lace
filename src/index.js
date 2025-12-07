@@ -9,6 +9,9 @@ import { scramjetPath } from "@mercuryworkshop/scramjet/path";
 import { epoxyPath } from "@mercuryworkshop/epoxy-transport";
 import { baremuxPath } from "@mercuryworkshop/bare-mux/node";
 
+// ★★★ ADD THIS IMPORT — REQUIRED FOR PROXYING URLs ★★★
+import { handler as scramjetHandler } from "@mercuryworkshop/scramjet/handler";
+
 const publicPath = fileURLToPath(new URL("../public/", import.meta.url));
 
 // Wisp Configuration
@@ -23,26 +26,9 @@ const fastify = Fastify({
   serverFactory: (handler) => {
     return createServer()
       .on("request", (req, res) => {
-        // 🔧 Only isolate Scramjet / BareMux / Epoxy / mediaplayer / scramjet proxied URLs
-        try {
-          const url = new URL(req.url || "/", "http://localhost");
-          const path = url.pathname || "/";
-
-          const needsIsolation =
-            path.startsWith("/scram/") ||
-            path.startsWith("/scramjet/") ||   // <-- added this
-            path.startsWith("/baremux/") ||
-            path.startsWith("/epoxy/") ||
-            path === "/mediaplayer.html";
-
-          if (needsIsolation) {
-            res.setHeader("Cross-Origin-Opener-Policy", "same-origin");
-            res.setHeader("Cross-Origin-Embedder-Policy", "require-corp");
-          }
-        } catch {
-          // if URL parsing explodes, just don't set COOP/COEP
-        }
-
+        // Required for Scramjet / Bare-Mux
+        res.setHeader("Cross-Origin-Opener-Policy", "same-origin");
+        res.setHeader("Cross-Origin-Embedder-Policy", "require-corp");
         handler(req, res);
       })
       .on("upgrade", (req, socket, head) => {
@@ -52,6 +38,7 @@ const fastify = Fastify({
   },
 });
 
+// ========== STATIC FILE ROUTES (unchanged) ==========
 fastify.register(fastifyStatic, {
   root: publicPath,
   decorateReply: true,
@@ -75,6 +62,13 @@ fastify.register(fastifyStatic, {
   decorateReply: false,
 });
 
+// ========== ★★★ THE FIX: SCRAMJET PROXY ENDPOINT ★★★
+// Required for URLs like /scramjet/https://cinemaos.live/player/12345
+fastify.all("/scramjet/*", async (req, reply) => {
+  return scramjetHandler(req, reply);
+});
+
+// ========== 404 HANDLER ==========
 fastify.setNotFoundHandler((res, reply) => {
   return reply.code(404).type("text/html").sendFile("404.html");
 });

@@ -7,9 +7,6 @@
       content="width=device-width, initial-scale=1.0, shrink-to-fit=no"
     />
     <title>S0LACE</title>
-      <div class="sub">
-          V1.0.1
-        </div>
 
     <link rel="shortcut icon" content="favicon.ico" />
     <link rel="stylesheet" href="index.css" />
@@ -24,13 +21,25 @@
 
     <!-- global settings / tab cloak -->
     <script src="global-hub.js" defer></script>
+
+    <style>
+      /* === added: clean subheader styling === */
+      .sub {
+        text-align: center;
+        font-size: 12px;
+        margin-top: 6px;
+        color: var(--fg-dim);
+        font-family: Spectral, serif;
+        opacity: 0.8;
+        pointer-events: none;
+      }
+    </style>
   </head>
 
   <body>
+
     <header class="site-header">
-      <div class="site-title">
-        S0LACE
-      </div>
+      <div class="site-title">S0LACE</div>
       <nav class="site-nav">
         <a href="index.html" class="active">Home</a>
         <a href="games.html">Games</a>
@@ -44,12 +53,13 @@
       <section class="home-center">
         <div class="home-logo-title">
           <div class="home-logo-mark">S0LACE</div>
+
+          <!-- === added: subheader placed correctly under the logo === -->
+          <div class="sub">V1.0.1</div>
         </div>
-        
+
         <section class="home-panel home-proxy-panel">
-          <div id="motd">
-            loading
-          </div>
+          <div id="motd">loading</div>
 
           <div style="margin-top: 14px;">
             <div class="proxy-label">PR0XY &gt;</div>
@@ -72,12 +82,13 @@
         </section>
       </section>
 
-      <!-- POPULAR GAMES STRIP (ONE STRIP, MOVING LIKE PIZZA) -->
+      <!-- POPULAR GAMES STRIP -->
       <section class="home-panel home-popular-panel">
         <div class="motd-label">POPULAR GAMES</div>
 
         <div class="popular-wrap">
           <div class="popular-track">
+            <!-- (unchanged list of games…) -->
             <!-- first loop -->
             <a
               class="popular-pill"

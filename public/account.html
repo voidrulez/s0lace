@@ -2,33 +2,45 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>S0LACE • Account</title>
 
   <link rel="stylesheet" href="index.css">
-  <script type="module" src="firebase.js"></script>
-  <script type="module" src="account.js"></script>
+  <script src="global-hub.js" defer></script>
 
   <style>
-    .account-wrapper {
+    .account-wrap {
       max-width: 420px;
-      margin: 40px auto;
-      padding: 20px;
+      margin: 0 auto;
+      margin-top: 30px;
+      display: flex;
+      flex-direction: column;
+      gap: 22px;
+    }
+
+    .account-panel {
       border: 2px solid var(--border-hard);
       background: var(--panel);
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
+      padding: 14px;
+      box-shadow: 0 0 0 1px #000, 0 0 18px rgba(0,0,0,.7);
     }
 
-    .account-section {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
+    .acc-title {
+      font-size: 12px;
+      margin-bottom: 12px;
+      color: var(--accent);
     }
 
-    input {
-      padding: 10px;
+    .acc-field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 10px;
+      font-size: 9px;
+    }
+
+    .acc-field input {
+      padding: 8px;
       border: 2px solid var(--border-hard);
       background: #000;
       color: var(--fg);
@@ -36,9 +48,28 @@
       font-size: 10px;
     }
 
-    button {
-      padding: 8px 12px;
+    .acc-btn {
+      width: 100%;
+      padding: 10px 0;
+      border: 2px solid var(--accent);
+      background: var(--accent-soft);
+      color: var(--accent);
+      cursor: pointer;
       font-size: 10px;
+      text-align: center;
+      font-family: "Press Start 2P";
+    }
+
+    .acc-btn:hover {
+      background: rgba(0,255,127,0.25);
+      box-shadow: 0 0 12px var(--accent);
+    }
+
+    .acc-error {
+      margin-top: 8px;
+      color: #ff6666;
+      font-size: 8px;
+      white-space: pre-line;
     }
   </style>
 </head>
@@ -51,38 +82,53 @@
     <a href="games.html">Games</a>
     <a href="media.html">Media</a>
     <a href="settings.html">Settings</a>
-    <a class="active" href="account.html">Account</a>
+    <a href="account.html" class="active">Account</a>
   </nav>
 </header>
 
-<main>
-  <div class="account-wrapper">
+<main class="account-wrap">
 
-    <!-- LOGIN / SIGNUP -->
-    <div id="login-box" class="account-section">
-      <h1>Login</h1>
+  <!-- LOGIN -->
+  <section class="account-panel">
+    <div class="acc-title">Log In</div>
+    <form id="login-form">
+      <div class="acc-field">
+        <label>Email</label>
+        <input type="email" id="login-email" required>
+      </div>
 
-      <input id="email-input" type="email" placeholder="Email">
-      <input id="pass-input" type="password" placeholder="Password">
+      <div class="acc-field">
+        <label>Password</label>
+        <input type="password" id="login-pass" required>
+      </div>
 
-      <button id="login-btn" class="proxy-btn">Log In</button>
-      <button id="signup-btn" class="proxy-btn">Sign Up</button>
-    </div>
+      <button class="acc-btn" type="submit">Log In</button>
+    </form>
+    <div id="login-error" class="acc-error"></div>
+  </section>
 
-    <!-- LOGGED IN VIEW -->
-    <div id="account-box" class="account-section" style="display:none;">
-      <h1>Account</h1>
+  <!-- SIGN UP -->
+  <section class="account-panel">
+    <div class="acc-title">Create Account</div>
+    <form id="signup-form">
+      <div class="acc-field">
+        <label>Email</label>
+        <input type="email" id="signup-email" required>
+      </div>
 
-      <div style="font-size:10px;">Logged in as:</div>
-      <div id="user-email" style="color:var(--accent); font-size:10px;"></div>
+      <div class="acc-field">
+        <label>Password</label>
+        <input type="password" id="signup-pass" required>
+      </div>
 
-      <button id="logout-btn" class="proxy-btn" style="margin-top:10px;">
-        Log Out
-      </button>
-    </div>
+      <button class="acc-btn" type="submit">Sign Up</button>
+    </form>
+    <div id="signup-error" class="acc-error"></div>
+  </section>
 
-  </div>
 </main>
+
+<script type="module" src="account.js"></script>
 
 </body>
 </html>

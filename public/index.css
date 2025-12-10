@@ -105,6 +105,47 @@
   --border-hard: #14532d;
 }
 
+/* ==========================================
+   SETTINGS PAGE OVERRIDES (normal sized UI)
+========================================== */
+
+.settings-panel,
+.settings-panel * {
+  font-size: 12px !important;
+  font-family: "Press Start 2P", sans-serif !important;
+}
+
+/* Buttons inside settings */
+.settings-panel .proxy-btn,
+#blank-launch,
+#btn-reset-settings,
+#btn-clear-media {
+  font-size: 12px !important;
+  padding: 10px 14px !important;
+  height: 40px;
+  text-align: center;
+  line-height: 1;
+}
+
+/* Make full-width action buttons cleaner */
+#blank-launch {
+  width: 100%;
+}
+
+/* Inputs */
+.settings-panel input,
+.settings-panel select {
+  font-size: 12px !important;
+  padding: 10px !important;
+  height: 38px;
+}
+
+/* Section labels */
+.settings-panel .motd-label {
+  font-size: 11px !important;
+}
+
+
 /* ========= REST OF YOUR ORIGINAL CSS (UNCHANGED) ========= */
 
 * {

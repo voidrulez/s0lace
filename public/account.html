@@ -203,7 +203,7 @@ document.getElementById("logout-btn").addEventListener("click", () => {
 document.getElementById("export-profile").addEventListener("click", () => {
   const data = {
     user: localStorage.getItem(KEY_USER),
-    profile: JSON.parse(localStorage.getItem(KEY_PROFILE") || "{}"),
+    profile: JSON.parse(localStorage.getItem(KEY_PROFILE) || "{}"),
     settings: {
       accent: localStorage.getItem("s0laceAccent"),
       theme: localStorage.getItem("s0laceTheme"),

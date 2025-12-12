@@ -1,191 +1,203 @@
 <!DOCTYPE html>
 <html lang="en-us">
-  <head>
-    
-    
-    
-    <base href="https://cdn.jsdelivr.net/gh/gn-math/assets@main/122/">
-    <meta charset="utf-8">
-    <meta name="robots" content="noindex, nofollow">
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>Survival Race</title>
-    <style>
-      html,
-      body {
-        background: #000;
-        width: 100%;
-        height: 100%;
-        overflow: visible;
-        padding: 0;
-        margin: 0;
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/z-f3-f1/1@main/style.css">
+
+  <!-- GameMonetize SDK -->
+  <script id="gamemonetize-sdk" src="https://cdn.jsdelivr.net/gh/testamalame/sef@main/sedk.js"></script>
+  <script>
+    window.SDK_OPTIONS = {
+      gameId: "jp112o3o4hzgrnc7zaewjkrfk282pul8",
+      onEvent(a) {
+        if (!window.myGameInstance) return;
+        if (a.name === "SDK_GAME_PAUSE") {
+          myGameInstance.SendMessage("AudioManager", "MuteAudio");
+        }
+        if (a.name === "SDK_GAME_START") {
+          myGameInstance.SendMessage("AudioManager", "UnmuteAudio");
+        }
       }
+    };
+  </script>
 
-      div#gameContainer {
-        background: transparent !important;
-        position: absolute;
-      }
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      background: #000;
+      overflow: hidden;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    #unity-container { position: fixed; inset: 0; }
+    #unity-canvas { width: 100%; height: 100%; display: block; outline: none; }
+    #loading-cover {
+      position: fixed; inset: 0; background: #000;
+      display: flex; align-items: center; justify-content: center; z-index: 10;
+    }
+    #unity-progress-bar-empty { width: 220px; height: 6px; background: #222; }
+    #unity-progress-bar-full { width: 0%; height: 100%; background: #fff; transition: width .15s linear; }
+  </style>
+</head>
 
-      div#gameContainer canvas {
-        position: absolute;
-      }
+<body class="dark">
 
-      div#gameContainer canvas[data-pixel-art="true"] {
-        position: absolute;
-        image-rendering: optimizeSpeed;
-        image-rendering: -webkit-crisp-edges;
-        image-rendering: -moz-crisp-edges;
-        image-rendering: -o-crisp-edges;
-        image-rendering: crisp-edges;
-        image-rendering: -webkit-optimize-contrast;
-        image-rendering: optimize-contrast;
-        image-rendering: pixelated;
-        -ms-interpolation-mode: nearest-neighbor;
-      }
-    </style>
-  </head>
-  <body>
-    <div id="gameContainer">
-      <canvas id="unity-canvas" data-pixel-art=""></canvas>
-      <script src="Build/yandexBrotli.loader.js"></script>
-      <script>
-        let myGameInstance = null;
-        let ysdk = null;
-        let player = null;
-        let leaderboard;
-        let payments = null;
-        let initGame = false;
-        let nowFullAdOpen = false;
+<div id="unity-container">
+  <canvas id="unity-canvas" tabindex="-1"></canvas>
+</div>
 
-        function InitGame() {
-          console.log('Init Game Success');
-          initGame = true;
-        }
+<div id="loading-cover">
+  <div id="unity-progress-bar-empty">
+    <div id="unity-progress-bar-full"></div>
+  </div>
+</div>
 
-        function FullAdShow() {}
+<script>
+/* ================= ENVIRONMENT ================= */
+window.environmentData = {
+  language: navigator.language || "en",
+  domain: "default",
+  deviceType: /Mobi|Android/i.test(navigator.userAgent) ? "mobile" : "desktop",
+  isMobile: /Mobi|Android/i.test(navigator.userAgent),
+  isDesktop: !/Mobi|Android/i.test(navigator.userAgent),
+  isTablet: false,
+  isTV: false,
+  appID: "web",
+  browserLang: navigator.language || "en",
+  payload: null,
+  promptCanShow: false,
+  reviewCanShow: false,
+  platform: navigator.platform || "web",
+  browser: "Chrome"
+};
 
-        function RewardedShow(id) {}
+/* ================= YANDEX SDK STUB ================= */
+window.ysdk = {
+  features: {},
+  adv: {
+    showFullscreenAdv: () => Promise.resolve(),
+    showRewardedVideo: () => Promise.resolve()
+  },
+  getPlayer: () => Promise.resolve({
+    getData: () => ({}),
+    setData: () => Promise.resolve(),
+    getStats: () => ({}),
+    setStats: () => Promise.resolve()
+  }),
+  getPayments: () => Promise.resolve(null),
+  getLeaderboards: () => Promise.resolve(null),
+  feedback: {
+    canReview: false,
+    requestReview: () => Promise.resolve()
+  }
+};
 
-        function StickyAdActivity(show) {}
+/* ================= CLOUD / PAYMENTS STUBS ================= */
+window.cloudSaves = "noData";
+window.paymentsData = "none";
+window.playerData = "noData";
+window.player = null;
+window.payments = null;
 
-        function InitPayments() {}
+window.GetPayments = () => Promise.resolve("none");
+window.SaveCloud = () => {};
+window.LoadCloud = () => Promise.resolve("noData");
+window.InitPlayer = () => Promise.resolve("noData");
+window.FullAdShow = () => {};
+window.RewardedShow = () => {};
+window.StickyAdActivity = () => {};
+window.Review = () => {};
+window.PromptShow = () => {};
+window.InitLeaderboards = () => {};
+window.GetLeaderboardScores = () => {};
+window.SetLeaderboardScores = () => {};
+window.ConsumePurchase = () => {};
+window.ConsumePurchases = () => {};
+window.InitLeaderboard = () => {};
+window.BuyPayments = () => {};
 
-        function BuyPayments(id) {}
-        let callCount_GetPayments = 0;
+/* ================= REQUIRED INITGAME STUB ================= */
+window.InitGame = function () {
+  try {
+    console.log("InitGame stub called");
+    if (window.myGameInstance) {
+      // no-op; stub exists to satisfy Unity/Yandex calls
+    }
+  } catch (e) {
+    console.warn(e);
+  }
+};
 
-        function GetPayments() {}
+/* ================= AUDIO UNLOCK ================= */
+function resumeAudio() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    if (ctx.state === "suspended") ctx.resume();
+  } catch {}
+  window.removeEventListener("pointerdown", resumeAudio);
+  window.removeEventListener("touchstart", resumeAudio);
+}
+window.addEventListener("pointerdown", resumeAudio);
+window.addEventListener("touchstart", resumeAudio);
 
-        function ConsumePurchase(id) {}
+/* ================= UNITY BOOT ================= */
+const buildUrl = "https://cdn.jsdelivr.net/gh/z-f3-f1/1@main/Build";
+const loaderUrl = buildUrl + "/yandexBrotli.loader.js";
 
-        function ConsumePurchases() {}
+const config = {
+  dataUrl: buildUrl + "/yandexBrotli.data.br",
+  frameworkUrl: buildUrl + "/yandexBrotli.framewor.js",
+  streamingAssetsUrl: "StreamingAssets",
+  companyName: "Brain massage",
+  productName: "Supercar Battle Royale",
+  productVersion: "0.0.197",
+  webAssemblyStreaming: false
+};
 
-        function InitLeaderboard() {}
+const wasmParts = [
+  "yandexBrotli.wasm.br.part1",
+  "yandexBrotli.wasm.br.part2"
+];
 
-        function SetLeaderboardScores(_name, score) {}
+const canvas = document.getElementById("unity-canvas");
+const loadingCover = document.getElementById("loading-cover");
+const progressBar = document.getElementById("unity-progress-bar-full");
 
-        function GetLeaderboardScores(nameLB, maxPlayers, quantityTop, quantityAround, photoSize, auth) {}
+let myGameInstance = null;
 
-        function EntriesLB(res, maxPlayers, photoSize) {
-          let LeaderboardEntriesText = 'no data';
-          let playersCount = 0;
-          let ranks = new Array(playersCount);
-          let photos = new Array(playersCount);
-          let mames = new Array(playersCount);
-          let scores = new Array(playersCount);
-          let uniqueIDs = new Array(playersCount);
-          let jsonPlayers = {
-            "entries": LeaderboardEntriesText,
-            "ranks": null,
-            "photos": photos,
-            "names": mames,
-            "scores": scores,
-            "uniqueIDs": uniqueIDs
-          };
-          return jsonPlayers;
-        }
+function mergeWasm(parts, done) {
+  const buffers = [];
+  (function next(i) {
+    if (i >= parts.length) return done(new Blob(buffers));
+    fetch(buildUrl + "/" + parts[i])
+      .then(r => r.arrayBuffer())
+      .then(b => { buffers.push(new Uint8Array(b)); next(i + 1); });
+  })(0);
+}
 
-        function Review() {}
+mergeWasm(wasmParts, blob => {
+  config.codeUrl = URL.createObjectURL(blob);
+  const s = document.createElement("script");
+  s.src = loaderUrl;
+  s.onload = () => {
+    createUnityInstance(canvas, config, p => {
+      progressBar.style.width = (p * 100) + "%";
+    }).then(instance => {
+      myGameInstance = instance;
+      loadingCover.style.display = "none";
+    }).catch(console.error);
+  };
+  document.body.appendChild(s);
+});
 
-        function PromptShow() {}
+document.addEventListener("contextmenu", e => e.preventDefault());
+window.addEventListener("pointerdown", () => canvas.focus());
+window.addEventListener("touchstart", () => canvas.focus());
+</script>
 
-        function PaintRBT(rbt) {}
-
-        function StaticRBTDeactivate() {}
-        var cloudSaves = 'noData';
-
-        function SaveCloud(jsonData, flush) {}
-
-        function LoadCloud(sendback) {}
-        var environmentData = 'null';
-
-        function RequestingEnvironmentData(sendback) {}
-        var playerData = 'noData';
-
-        function InitPlayer(sendback) {}
-
-        function NotAuthorized() {
-          let authJson = {
-            "playerAuth": "rejected",
-            "playerName": "unauthorized",
-            "playerId": "unauthorized",
-            "playerPhoto": "null"
-          };
-          return JSON.stringify(authJson);
-        }
-
-        function OpenAuthDialog() {}
-        var canvas = document.querySelector("#unity-canvas");
-        var config = {
-          dataUrl: "Build/yandexBrotli.data.unityweb",
-          frameworkUrl: "Build/yandexBrotli.framework.js.unityweb",
-          codeUrl: "Build/yandexBrotli.wasm.unityweb",
-          streamingAssetsUrl: "StreamingAssets",
-          companyName: "Survival",
-          productName: "Survival Race",
-          productVersion: "0.0.15",
-        };
-        var scaleToFit;
-        try {
-          scaleToFit = !!JSON.parse("true");
-        } catch (e) {
-          scaleToFit = true;
-        }
-
-        function progressHandler(progress) {
-          var percent = progress * 100 + '%';
-          canvas.style.background = 'linear-gradient(to right, white, white ' + percent + ', transparent ' + percent + ', transparent) no-repeat center';
-          canvas.style.backgroundSize = '100% 1rem';
-        }
-
-        function onResize() {
-          var container = canvas.parentElement;
-          var w;
-          var h;
-          if (scaleToFit) {
-            w = window.innerWidth;
-            h = window.innerHeight;
-            var r = 540 / 960;
-            if (w * r > window.innerHeight) {
-              w = Math.min(w, Math.ceil(h / r));
-            }
-            h = Math.floor(w * r);
-          } else {
-            w = 960;
-            h = 540;
-          }
-          container.style.width = canvas.style.width = w + "px";
-          container.style.height = canvas.style.height = h + "px";
-          container.style.top = Math.floor((window.innerHeight - h) / 2) + "px";
-          container.style.left = Math.floor((window.innerWidth - w) / 2) + "px";
-        }
-        var gameInstance;
-        createUnityInstance(canvas, config, progressHandler).then(function(instance) {
-          canvas = instance.Module.canvas;
-          onResize();
-          gameInstance = instance;
-        });
-        window.addEventListener('resize', onResize);
-        onResize();
-      </script>
-    </div>
 </body>
 </html>

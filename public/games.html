@@ -1051,5 +1051,66 @@ updateSideIcons();
 window.addEventListener("storage", updateSideIcons);
 </script>
 
+  <script>
+const searchInput = document.getElementById("game-search");
+const grid = document.getElementById("game-grid");
+const emptyMsg = document.getElementById("game-empty");
+
+let cards = [];
+
+// initialize once games exist
+function initGames() {
+  cards = Array.from(grid.querySelectorAll(".game-card"));
+  sortGamesAZ();
+}
+
+function sortGamesAZ() {
+  const pinned = cards.find(
+    c => (c.dataset.name || "").toLowerCase() === "suggestions"
+  );
+
+  const rest = cards
+    .filter(c => c !== pinned)
+    .sort((a, b) => {
+      const an = (a.dataset.name || "").toLowerCase();
+      const bn = (b.dataset.name || "").toLowerCase();
+      return an.localeCompare(bn);
+    });
+
+  grid.innerHTML = "";
+  if (pinned) grid.appendChild(pinned);
+  rest.forEach(c => grid.appendChild(c));
+
+  cards = pinned ? [pinned, ...rest] : rest;
+}
+
+function filterGames() {
+  const q = (searchInput.value || "").toLowerCase();
+  let visible = 0;
+
+  cards.forEach(card => {
+    const name = (card.dataset.name || "").toLowerCase();
+    const match = !q || name.includes(q);
+    card.style.display = match ? "" : "none";
+    if (match) visible++;
+  });
+
+  if (emptyMsg) {
+    emptyMsg.style.display = q && visible === 0 ? "block" : "none";
+  }
+}
+
+// wire up
+if (searchInput) {
+  searchInput.addEventListener("input", filterGames);
+}
+
+// call AFTER games are inserted
+window.addEventListener("DOMContentLoaded", () => {
+  if (grid) initGames();
+});
+</script>
+
+
 </body>
 </html>

@@ -1,114 +1,58 @@
 <!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>S0LACE • Games</title>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, shrink-to-fit=no"
+    />
+    <title>S0LACE • Games</title>
 
-  <link rel="shortcut icon" href="favicon.ico" />
-  <link rel="stylesheet" href="index.css" />
+    <link rel="shortcut icon" content="favicon.ico" />
+    <link rel="stylesheet" href="index.css" />
+    <script src="global-hub.js" defer></script>
+    <script src="register-sw.js" defer></script>
 
-  <!-- global theme / settings -->
-  <script src="global-hub.js" defer></script>
-  <script src="register-sw.js" defer></script>
+  </head>
 
-  <style>
-    body {
-      min-height: 100vh;
-    }
+  <nav class="side-header">
+  <a href="index.html" class="side-icon" data-icon="home">
+    <img />
+  </a>
 
-    main {
-      min-height: 100vh;
-      padding: 48px 64px;
-    }
+  <a href="games.html" class="side-icon" data-icon="games">
+    <img />
+  </a>
 
-    /* ===== PAGE HEADER ===== */
-    .page-wrap {
-      max-width: 1200px;
-      margin: 0 auto;
-    }
+  <a href="media.html" class="side-icon" data-icon="media">
+    <img />
+  </a>
 
-    .page-title {
-      font-size: 48px;
-      font-weight: 800;
-      color: var(--fg);
-    }
-
-    .page-sub {
-      margin-top: 10px;
-      font-size: 12px;
-      font-family: "Press Start 2P";
-      color: var(--fg-dim);
-    }
-
-    /* ===== SEARCH ===== */
-    .games-search-wrap {
-      margin-top: 36px;
-      max-width: 520px;
-    }
-
-    .games-search-wrap input {
-      width: 100%;
-      padding: 14px 18px;
-      font-size: 15px;
-      border-radius: 14px;
-
-      background: rgba(255,255,255,0.03);
-      color: var(--fg);
-
-      border: 2px solid color-mix(in srgb, var(--accent) 55%, transparent);
-      outline: none;
-
-      transition: border-color .2s ease, box-shadow .2s ease;
-    }
-
-    .games-search-wrap input::placeholder {
-      color: var(--fg-dim);
-    }
-
-    .games-search-wrap input:focus {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 22%, transparent);
-    }
-
-    /* ===== EMPTY STATE ===== */
-    .games-placeholder {
-      margin-top: 64px;
-      font-size: 14px;
-      color: var(--fg-dim);
-    }
-  </style>
-</head>
-
-<body>
-
-<!-- SIDE ICON NAV -->
-<nav class="side-header">
-  <a href="index.html" class="side-icon" data-icon="home"><img /></a>
-  <a href="games.html" class="side-icon" data-icon="games"><img /></a>
-  <a href="media.html" class="side-icon" data-icon="media"><img /></a>
-  <a href="settings.html" class="side-icon" data-icon="settings"><img /></a>
+  <a href="settings.html" class="side-icon" data-icon="settings">
+    <img />
+  </a>
 </nav>
 
-<main>
-  <div class="page-wrap">
 
-    <!-- HEADER -->
-    <div class="page-title">Games</div>
+    <main>
+      <div class="page-header">
+        <h1>Games</h1>
+      </div>
 
-    <!-- SEARCH -->
-    <div class="games-search-wrap">
-      <input
-        id="game-search"
-        type="text"
-        placeholder="search for a game…"
-        autocomplete="off"
-      />
-    </div>
+      <!-- SEARCH -->
+      <div class="games-search-wrap">
+        <span class="search-label">SEARCH &gt;</span>
+        <input
+          id="game-search"
+          type="text"
+          placeholder="search for your favorite games"
+          autocomplete="off"
+        />
+      </div>
 
-    <!-- PLACEHOLDER (remove when grid added) -->
       <div class="game-grid" id="game-grid">
-       <a
+        <!-- your existing cards kept as-is -->
+        <a
           class="game-card"
           href="https://forms.gle/VH47pgHw1kWAFuDY6"
           data-name="suggestions"
@@ -1021,13 +965,12 @@
             <div class="game-overlay">Idle Breakout</div>
           </div>
         </a>
-    </div>
+      </div>
 
-  </div>
-</main>
+      <div id="game-empty">No games match that search.</div>
+    </main>
 
-<!-- SIDE ICON COLOR SYNC -->
-<script>
+  <script>
 function getAccent() {
   return localStorage.getItem("s0laceAccent") || "gray";
 }
@@ -1043,74 +986,73 @@ function updateSideIcons() {
       location.pathname.endsWith(link.getAttribute("href"));
 
     link.classList.toggle("active", isActive);
+
     img.src = `thumbs/${icon}/${isActive ? accent : "gray"}.png`;
   });
 }
 
 updateSideIcons();
+
+// Update when accent color changes
 window.addEventListener("storage", updateSideIcons);
 </script>
 
-  <script>
-const searchInput = document.getElementById("game-search");
-const grid = document.getElementById("game-grid");
-const emptyMsg = document.getElementById("game-empty");
 
-let cards = [];
+    <script>
+      const searchInput = document.getElementById("game-search");
+      const grid = document.getElementById("game-grid");
+      const emptyMsg = document.getElementById("game-empty");
 
-// initialize once games exist
-function initGames() {
-  cards = Array.from(grid.querySelectorAll(".game-card"));
-  sortGamesAZ();
-}
+      // grab all cards once
+      let cards = Array.from(grid.querySelectorAll(".game-card"));
 
-function sortGamesAZ() {
-  const pinned = cards.find(
-    c => (c.dataset.name || "").toLowerCase() === "suggestions"
-  );
+      // sort A–Z, but keep "suggestions" pinned at the very top
+      function sortGamesAZ() {
+        const pinned = cards.find(
+          (card) => (card.dataset.name || "").toLowerCase() === "suggestions"
+        );
 
-  const rest = cards
-    .filter(c => c !== pinned)
-    .sort((a, b) => {
-      const an = (a.dataset.name || "").toLowerCase();
-      const bn = (b.dataset.name || "").toLowerCase();
-      return an.localeCompare(bn);
-    });
+        const rest = cards
+          .filter((card) => card !== pinned)
+          .sort((a, b) => {
+            const aName = (a.dataset.name || "").toLowerCase();
+            const bName = (b.dataset.name || "").toLowerCase();
+            if (aName < bName) return -1;
+            if (aName > bName) return 1;
+            return 0;
+          });
 
-  grid.innerHTML = "";
-  if (pinned) grid.appendChild(pinned);
-  rest.forEach(c => grid.appendChild(c));
+        // clear and re-append in sorted order
+        grid.innerHTML = "";
+        if (pinned) grid.appendChild(pinned);
+        rest.forEach((card) => grid.appendChild(card));
 
-  cards = pinned ? [pinned, ...rest] : rest;
-}
+        // update cards array to match new order
+        cards = pinned ? [pinned, ...rest] : rest;
+      }
 
-function filterGames() {
-  const q = (searchInput.value || "").toLowerCase();
-  let visible = 0;
+      function filterGames() {
+        const q = (searchInput.value || "").trim().toLowerCase();
+        let visibleCount = 0;
 
-  cards.forEach(card => {
-    const name = (card.dataset.name || "").toLowerCase();
-    const match = !q || name.includes(q);
-    card.style.display = match ? "" : "none";
-    if (match) visible++;
-  });
+        cards.forEach((card) => {
+          const name = (card.dataset.name || "").toLowerCase();
+          const match = !q || name.includes(q);
+          card.style.display = match ? "" : "none";
+          if (match) visibleCount++;
+        });
 
-  if (emptyMsg) {
-    emptyMsg.style.display = q && visible === 0 ? "block" : "none";
-  }
-}
+        if (emptyMsg) {
+          emptyMsg.style.display = q && visibleCount === 0 ? "block" : "none";
+        }
+      }
 
-// wire up
-if (searchInput) {
-  searchInput.addEventListener("input", filterGames);
-}
+      // run sort once on load
+      sortGamesAZ();
 
-// call AFTER games are inserted
-window.addEventListener("DOMContentLoaded", () => {
-  if (grid) initGames();
-});
-</script>
-
-
-</body>
+      if (searchInput) {
+        searchInput.addEventListener("input", filterGames);
+      }
+    </script>
+  </body>
 </html>

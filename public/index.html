@@ -8,17 +8,18 @@
   <link rel="shortcut icon" href="favicon.ico" />
   <link rel="stylesheet" href="index.css" />
 
-  <!-- Scramjet -->
+  <!-- REQUIRED ORDER (DO NOT CHANGE) -->
+  <script src="baremux/index.js"></script>
+  <script src="epoxy/index.js"></script>
   <script src="/scram/scramjet.all.js"></script>
-  <script src="baremux/index.js" defer></script>
-  <script src="epoxy/index.js" defer></script>
+
   <script src="register-sw.js" defer></script>
-  <script src="search.js" defer></script>
   <script src="index.js" defer></script>
   <script src="global-hub.js" defer></script>
 
   <style>
     body { min-height: 100vh; }
+
     main {
       min-height: 100vh;
       display: flex;
@@ -99,7 +100,6 @@
 
 <body>
 
-<!-- SIDE NAV -->
 <nav class="side-header">
   <a href="index.html" class="side-icon" data-icon="home"><img /></a>
   <a href="games.html" class="side-icon" data-icon="games"><img /></a>
@@ -109,6 +109,7 @@
 
 <main>
   <div class="home-wrap">
+
     <div class="home-title">S0LACE</div>
     <div class="home-version">v1.2.0</div>
 
@@ -120,9 +121,9 @@
 
     <div class="proxy-wrap">
       <form id="sj-form">
-        <input id="sj-search-engine" type="hidden"
-               value="https://www.google.com/search?q=%s" />
-        <input id="sj-address" placeholder="Enter a URL or search Google" />
+        <input id="sj-address"
+               placeholder="Enter a URL or search Google"
+               autocomplete="off" />
       </form>
     </div>
 
@@ -131,88 +132,117 @@
       <div>WEEK <span id="vis-week">—</span></div>
       <div>ALL <span id="vis-all">—</span></div>
     </div>
+
   </div>
 </main>
 
+<!-- PROXY SUBMIT (CLEAN + WORKING) -->
+<script>
+const form = document.getElementById("sj-form");
+const input = document.getElementById("sj-address");
+
+form.addEventListener("submit", e => {
+  e.preventDefault();
+
+  let url = input.value.trim();
+  if (!url) return;
+
+  if (!url.includes("://")) {
+    url = "https://www.google.com/search?q=" + encodeURIComponent(url);
+  }
+
+  scramjet.open(url);
+});
+</script>
+
 <!-- ICON SYNC -->
 <script>
-function getAccent(){ return localStorage.getItem("s0laceAccent") || "gray"; }
-function updateSideIcons(){
+function getAccent() {
+  return localStorage.getItem("s0laceAccent") || "gray";
+}
+function updateSideIcons() {
   const accent = getAccent();
-  document.querySelectorAll(".side-icon").forEach(a=>{
-    const icon=a.dataset.icon, img=a.querySelector("img");
-    const active=a.href===location.href;
-    img.src=`thumbs/${icon}/${active?accent:"gray"}.png`;
+  document.querySelectorAll(".side-icon").forEach(a => {
+    const icon = a.dataset.icon;
+    const img = a.querySelector("img");
+    const active = a.href === location.href;
+    img.src = `thumbs/${icon}/${active ? accent : "gray"}.png`;
   });
 }
 updateSideIcons();
-window.addEventListener("storage",updateSideIcons);
+window.addEventListener("storage", updateSideIcons);
 </script>
 
 <!-- CLOCK + BATTERY -->
 <script>
-function updateClock(){
-  const d=new Date();
-  let h=d.getHours(), m=String(d.getMinutes()).padStart(2,"0");
-  const ap=h>=12?"PM":"AM";
-  h=h%12||12;
-  clock.textContent=`${h}:${m} ${ap}`;
+function updateClock() {
+  const d = new Date();
+  let h = d.getHours();
+  const m = String(d.getMinutes()).padStart(2,"0");
+  const ap = h >= 12 ? "PM" : "AM";
+  h = h % 12 || 12;
+  clock.textContent = `${h}:${m} ${ap}`;
 }
-updateClock(); setInterval(updateClock,1000);
+updateClock();
+setInterval(updateClock, 1000);
 
-if(navigator.getBattery){
-  navigator.getBattery().then(b=>{
-    const upd=()=>battery.textContent=Math.round(b.level*100)+"%";
-    upd(); b.onlevelchange=upd; b.onchargingchange=upd;
+if (navigator.getBattery) {
+  navigator.getBattery().then(b => {
+    const upd = () => battery.textContent = Math.round(b.level * 100) + "%";
+    upd();
+    b.onlevelchange = upd;
+    b.onchargingchange = upd;
   });
-}else battery.textContent="N/A";
+} else {
+  battery.textContent = "N/A";
+}
 </script>
 
-<!-- FIREBASE (SINGLE INIT + SAFE) -->
+<!-- FIREBASE (SAFE SINGLE INIT) -->
 <script type="module">
 import { initializeApp, getApps } from
 "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getDatabase, ref, get, runTransaction } from
 "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-const cfg={
-  apiKey:"AIzaSyBbgy76ThxHaKlOhpiLQ6Nw4ekR1b9t3DA",
-  databaseURL:"https://s0lace-web-default-rtdb.firebaseio.com",
-  projectId:"s0lace-web"
+const cfg = {
+  apiKey: "AIzaSyBbgy76ThxHaKlOhpiLQ6Nw4ekR1b9t3DA",
+  databaseURL: "https://s0lace-web-default-rtdb.firebaseio.com",
+  projectId: "s0lace-web"
 };
 
-const app=getApps().length?getApps()[0]:initializeApp(cfg);
-const db=getDatabase(app);
+const app = getApps().length ? getApps()[0] : initializeApp(cfg);
+const db = getDatabase(app);
 
-const elAll=document.getElementById("vis-all");
-const elToday=document.getElementById("vis-today");
-const elWeek=document.getElementById("vis-week");
+const elAll = vis-all;
+const elToday = vis-today;
+const elWeek = vis-week;
 
-const today=()=>new Date().toISOString().split("T")[0];
-const week=()=>{
-  const d=new Date(),j=new Date(d.getFullYear(),0,1);
-  return "week_"+Math.ceil((((d-j)/86400000)+j.getDay()+1)/7);
+const today = () => new Date().toISOString().split("T")[0];
+const week = () => {
+  const d = new Date(), j = new Date(d.getFullYear(),0,1);
+  return "week_" + Math.ceil((((d - j)/86400000) + j.getDay() + 1) / 7);
 };
 
-async function incrementOnce(){
-  if(sessionStorage.getItem("s0lace-counted")) return;
+async function incrementOnce() {
+  if (sessionStorage.getItem("s0lace-counted")) return;
   sessionStorage.setItem("s0lace-counted","1");
   await Promise.all([
-    runTransaction(ref(db,"visitors/all"),v=>(v||0)+1),
-    runTransaction(ref(db,"visitors/today/"+today()),v=>(v||0)+1),
-    runTransaction(ref(db,"visitors/week/"+week()),v=>(v||0)+1)
+    runTransaction(ref(db,"visitors/all"), v => (v||0)+1),
+    runTransaction(ref(db,"visitors/today/"+today()), v => (v||0)+1),
+    runTransaction(ref(db,"visitors/week/"+week()), v => (v||0)+1)
   ]);
 }
 
-async function render(){
-  const [a,t,w]=await Promise.all([
+async function render() {
+  const [a,t,w] = await Promise.all([
     get(ref(db,"visitors/all")),
     get(ref(db,"visitors/today/"+today())),
     get(ref(db,"visitors/week/"+week()))
   ]);
-  elAll.textContent=a.val()||0;
-  elToday.textContent=t.val()||0;
-  elWeek.textContent=w.val()||0;
+  elAll.textContent = a.val() || 0;
+  elToday.textContent = t.val() || 0;
+  elWeek.textContent = w.val() || 0;
 }
 
 await incrementOnce();

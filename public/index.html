@@ -17,35 +17,20 @@
 <script src="global-hub.js" defer></script>
 
 <style>
-/* Defining variables in case index.css is missing them */
-:root {
-  --fg: #ffffff;
-  --fg-dim: #888888;
-  --accent: #00ffcc;
-  --bg: #0a0a0a;
-}
-
-body {
-  min-height: 100vh; 
-  margin: 0; 
-  background: var(--bg);
-  color: var(--fg);
-  font-family: sans-serif;
-}
-
+:root { --fg: #fff; --fg-dim: #888; --accent: #00ffcc; --bg: #0a0a0a; }
+body { min-height: 100vh; margin: 0; background: var(--bg); color: var(--fg); font-family: sans-serif; overflow-x: hidden; }
 main { min-height: 100vh; display: flex; justify-content: center; align-items: center; }
 
-/* The Title Styling */
-.home-title {
-  font-family: 'Press Start 2P', system-ui; /* Applied the retro font */
-  font-size: 48px; 
-  font-weight: 800;
-  color: var(--fg);
-  text-transform: uppercase;
-  letter-spacing: -2px;
-}
-
 .home-wrap { max-width: 720px; width: 100%; padding: 32px; text-align: center; }
+
+/* Fixed Font Styling */
+.home-title { 
+    font-family: 'Press Start 2P', cursive; 
+    font-size: 64px; 
+    font-weight: 800; 
+    color: var(--fg); 
+    margin: 0;
+}
 .home-version { margin-top: 14px; font-size: 10px; font-family: "Press Start 2P"; color: var(--fg-dim); }
 
 .home-status {
@@ -62,7 +47,6 @@ main { min-height: 100vh; display: flex; justify-content: center; align-items: c
 #battery { color: var(--accent); }
 
 .proxy-wrap { margin-top: 28px; }
-
 #sj-address {
   width: 100%;
   padding: 18px 22px;
@@ -73,10 +57,7 @@ main { min-height: 100vh; display: flex; justify-content: center; align-items: c
   border: 2px solid var(--accent);
   outline: none;
   box-sizing: border-box;
-  transition: border-color 0.2s;
 }
-
-#sj-address:focus { border-color: #fff; }
 
 .visitor-meta {
   margin-top: 36px;
@@ -126,11 +107,12 @@ main { min-height: 100vh; display: flex; justify-content: center; align-items: c
 </main>
 
 <script>
-// UI & Icons
+// UI & CLOCK
 function getAccent(){ return localStorage.getItem("s0laceAccent") || "gray"; }
 function updateIcons(){
   document.querySelectorAll(".side-icon").forEach(a => {
     const img = a.querySelector("img");
+    if(!img) return;
     const icon = a.dataset.icon;
     const active = window.location.pathname.includes(a.getAttribute('href'));
     img.src = `thumbs/${icon}/${active ? getAccent() : "gray"}.png`;
@@ -138,11 +120,10 @@ function updateIcons(){
 }
 updateIcons();
 
-// Clock & Battery
 function updateClock(){
-  const d = new Date();
-  let h = d.getHours(), m = String(d.getMinutes()).padStart(2, "0");
-  const ap = h >= 12 ? "PM" : "AM"; h = h % 12 || 12;
+  const d=new Date();
+  let h=d.getHours(), m=String(d.getMinutes()).padStart(2,"0");
+  const ap=h>=12?"PM":"AM"; h=h%12||12;
   document.getElementById("clock").textContent = `${h}:${m} ${ap}`;
 }
 updateClock(); setInterval(updateClock, 1000);
@@ -154,25 +135,69 @@ if(navigator.getBattery){
   });
 }
 
-// Proxy Logic
+// PROXY HANDLER
 document.getElementById("sj-form").addEventListener("submit", e => {
   e.preventDefault();
-  const input = document.getElementById("sj-address").value.trim();
-  if(!input) return;
-
-  // Check if SW is ready
-  if (!navigator.serviceWorker.controller) {
-    alert("Proxy is initializing. Please refresh the page once.");
-    return;
-  }
-
+  const address = document.getElementById("sj-address").value.trim();
   const engine = document.getElementById("sj-search-engine").value;
-  const url = /^https?:\/\//i.test(input) ? input : engine.replace("%s", encodeURIComponent(input));
   
-  if (typeof scramjet !== 'undefined') {
-    scramjet.open(url);
+  if(!address) return;
+
+  const url = /^https?:\/\//i.test(address) ? address : engine.replace("%s", encodeURIComponent(address));
+  
+  // Call Scramjet directly - simplified for reliability
+  if (window.scramjet) {
+    window.scramjet.open(url);
+  } else {
+    console.error("Scramjet script not loaded yet.");
+    // Fallback if the script is there but object name differs
+    if (typeof scramjet !== 'undefined') scramjet.open(url);
   }
 });
+</script>
+
+<script type="module">
+import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"
+import { getDatabase, ref, get, runTransaction } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js"
+
+const cfg = {
+  apiKey: "AIzaSyBbgy76ThxHaKlOhpiLQ6Nw4ekR1b9t3DA",
+  databaseURL: "https://s0lace-web-default-rtdb.firebaseio.com",
+  projectId: "s0lace-web"
+};
+
+async function initStats() {
+    try {
+        const app = getApps().length ? getApps()[0] : initializeApp(cfg);
+        const db = getDatabase(app);
+
+        const today = () => new Date().toISOString().split("T")[0];
+        const week = () => {
+            const d = new Date(), j = new Date(d.getFullYear(), 0, 1);
+            return "week_" + Math.ceil((((d - j) / 86400000) + j.getDay() + 1) / 7);
+        }
+
+        if(!sessionStorage.getItem("s0lace-counted")){
+            sessionStorage.setItem("s0lace-counted", "1");
+            runTransaction(ref(db, "visitors/all"), v => (v || 0) + 1);
+            runTransaction(ref(db, "visitors/today/" + today()), v => (v || 0) + 1);
+            runTransaction(ref(db, "visitors/week/" + week()), v => (v || 0) + 1);
+        }
+
+        const [a, t, w] = await Promise.all([
+            get(ref(db, "visitors/all")),
+            get(ref(db, "visitors/today/" + today())),
+            get(ref(db, "visitors/week/" + week()))
+        ]);
+
+        document.getElementById("vis-all").textContent = a.val() || 0;
+        document.getElementById("vis-today").textContent = t.val() || 0;
+        document.getElementById("vis-week").textContent = w.val() || 0;
+    } catch (e) {
+        console.error("Firebase Error:", e);
+    }
+}
+initStats();
 </script>
 </body>
 </html>

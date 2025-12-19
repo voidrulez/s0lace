@@ -8,13 +8,12 @@
 <link rel="shortcut icon" href="favicon.ico" />
 <link rel="stylesheet" href="index.css" />
 
-<!-- Scramjet ONLY (NO BAREMUX HERE) -->
 <script src="/scram/scramjet.all.js"></script>
 <script src="register-sw.js" defer></script>
 <script src="global-hub.js" defer></script>
 
 <style>
-body{min-height:100vh}
+body{min-height:100vh; margin:0; font-family: sans-serif; background: #000;}
 main{min-height:100vh;display:flex;justify-content:center;align-items:center}
 
 body.sj-proxied iframe,
@@ -23,8 +22,8 @@ body.sj-proxied .scramjet-frame{
 }
 
 .home-wrap{max-width:720px;width:100%;padding:32px;text-align:center}
-.home-title{font-size:64px;font-weight:800;color:var(--fg)}
-.home-version{margin-top:14px;font-size:11px;font-family:"Press Start 2P";color:var(--fg-dim)}
+.home-title{font-size:64px;font-weight:800;color:var(--fg, #fff)}
+.home-version{margin-top:14px;font-size:11px;font-family:"Press Start 2P";color:var(--fg-dim, #888)}
 
 .home-status{
   margin-top:16px;
@@ -33,11 +32,11 @@ body.sj-proxied .scramjet-frame{
   display:flex;
   justify-content:center;
   gap:10px;
-  color:var(--fg-dim)
+  color:var(--fg-dim, #888)
 }
 
-#clock{color:var(--fg)}
-#battery{color:var(--accent)}
+#clock{color:var(--fg, #fff)}
+#battery{color:var(--accent, #00ffcc)}
 
 .proxy-wrap{margin-top:28px}
 
@@ -47,9 +46,10 @@ body.sj-proxied .scramjet-frame{
   font-size:16px;
   border-radius:16px;
   background:rgba(255,255,255,.03);
-  color:var(--fg);
-  border:2px solid color-mix(in srgb,var(--accent) 55%,transparent);
-  outline:none
+  color:var(--fg, #fff);
+  border:2px solid color-mix(in srgb, var(--accent, #00ffcc) 55%, transparent);
+  outline:none;
+  box-sizing: border-box;
 }
 
 .visitor-meta{
@@ -59,15 +59,14 @@ body.sj-proxied .scramjet-frame{
   gap:28px;
   font-family:"Press Start 2P";
   font-size:10px;
-  color:var(--fg-dim)
+  color:var(--fg-dim, #888)
 }
-.visitor-meta span{color:var(--accent)}
+.visitor-meta span{color:var(--accent, #00ffcc)}
 </style>
 </head>
 
 <body>
 
-<!-- SIDE NAV -->
 <nav class="side-header">
   <a href="index.html" class="side-icon" data-icon="home"><img></a>
   <a href="games.html" class="side-icon" data-icon="games"><img></a>
@@ -89,11 +88,8 @@ body.sj-proxied .scramjet-frame{
 
 <div class="proxy-wrap">
 <form id="sj-form">
-  <input type="hidden" id="sj-search-engine"
-         value="https://www.google.com/search?q=%s">
-  <input id="sj-address"
-         placeholder="Enter a URL or search Google"
-         autocomplete="off">
+  <input type="hidden" id="sj-search-engine" value="https://www.google.com/search?q=%s">
+  <input id="sj-address" placeholder="Enter a URL or search Google" autocomplete="off">
 </form>
 </div>
 
@@ -106,93 +102,96 @@ body.sj-proxied .scramjet-frame{
 </div>
 </main>
 
-<!-- ICON COLOR SYNC -->
 <script>
+// UI/Icons Logic
 function getAccent(){return localStorage.getItem("s0laceAccent")||"gray"}
 function updateIcons(){
   document.querySelectorAll(".side-icon").forEach(a=>{
     const img=a.querySelector("img")
     const icon=a.dataset.icon
-    const active=a.href===location.href
+    const active=a.getAttribute('href') === window.location.pathname.split('/').pop()
     img.src=`thumbs/${icon}/${active?getAccent():"gray"}.png`
   })
 }
-updateIcons()
-window.addEventListener("storage",updateIcons)
-</script>
+updateIcons();
+window.addEventListener("storage",updateIcons);
 
-<!-- CLOCK + BATTERY -->
-<script>
+// Clock + Battery Logic
 function updateClock(){
   const d=new Date()
-  let h=d.getHours(),m=String(d.getMinutes()).padStart(2,"0")
-  const ap=h>=12?"PM":"AM";h=h%12||12
-  clock.textContent=`${h}:${m} ${ap}`
+  let h=d.getHours(), m=String(d.getMinutes()).padStart(2,"0")
+  const ap=h>=12?"PM":"AM"; h=h%12||12
+  document.getElementById("clock").textContent=`${h}:${m} ${ap}`
 }
-updateClock();setInterval(updateClock,1000)
+updateClock(); setInterval(updateClock,1000);
 
 if(navigator.getBattery){
   navigator.getBattery().then(b=>{
-    const u=()=>battery.textContent=Math.round(b.level*100)+"%"
-    u();b.onlevelchange=u;b.onchargingchange=u
+    const u=()=>document.getElementById("battery").textContent=Math.round(b.level*100)+"%"
+    u(); b.onlevelchange=u; b.onchargingchange=u
   })
-}else battery.textContent="N/A"
+} else document.getElementById("battery").textContent="N/A";
+
+// FIXED PROXY HANDLER
+document.getElementById("sj-form").addEventListener("submit", e => {
+  e.preventDefault();
+  const addressField = document.getElementById("sj-address");
+  const engineField = document.getElementById("sj-search-engine");
+  
+  const input = addressField.value.trim();
+  if(!input) return;
+
+  const engine = engineField.value;
+  const url = /^https?:\/\//i.test(input) 
+    ? input 
+    : engine.replace("%s", encodeURIComponent(input));
+
+  // Ensure scramjet library is loaded before calling
+  if (typeof scramjet !== 'undefined') {
+    scramjet.open(url);
+  } else {
+    alert("Scramjet is still loading or failed to initialize.");
+  }
+});
 </script>
 
-<!-- PROXY HANDLER (SINGLE, WORKING) -->
-<script>
-document.getElementById("sj-form").addEventListener("submit",e=>{
-  e.preventDefault()
-  const input=sj-address.value.trim()
-  if(!input)return
-  const engine=sj-search-engine.value
-  const url=/^https?:\/\//i.test(input)
-    ?input
-    :engine.replace("%s",encodeURIComponent(input))
-  scramjet.open(url)
-})
-</script>
-
-<!-- FIREBASE VISITORS (SAFE INIT) -->
 <script type="module">
-import{initializeApp,getApps}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"
-import{getDatabase,ref,get,runTransaction}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js"
+import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"
+import { getDatabase, ref, get, runTransaction } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js"
 
-const cfg={
-  apiKey:"AIzaSyBbgy76ThxHaKlOhpiLQ6Nw4ekR1b9t3DA",
-  databaseURL:"https://s0lace-web-default-rtdb.firebaseio.com",
-  projectId:"s0lace-web"
+const cfg = {
+  apiKey: "AIzaSyBbgy76ThxHaKlOhpiLQ6Nw4ekR1b9t3DA",
+  databaseURL: "https://s0lace-web-default-rtdb.firebaseio.com",
+  projectId: "s0lace-web"
 }
 
-const app=getApps().length?getApps()[0]:initializeApp(cfg)
-const db=getDatabase(app)
+const app = getApps().length ? getApps()[0] : initializeApp(cfg);
+const db = getDatabase(app);
 
-const elAll=document.getElementById("vis-all")
-const elToday=document.getElementById("vis-today")
-const elWeek=document.getElementById("vis-week")
-
-const today=()=>new Date().toISOString().split("T")[0]
-const week=()=>{
-  const d=new Date(),j=new Date(d.getFullYear(),0,1)
-  return"week_"+Math.ceil((((d-j)/86400000)+j.getDay()+1)/7)
+const today = () => new Date().toISOString().split("T")[0];
+const week = () => {
+  const d = new Date(), j = new Date(d.getFullYear(), 0, 1);
+  return "week_" + Math.ceil((((d - j) / 86400000) + j.getDay() + 1) / 7);
 }
 
 if(!sessionStorage.getItem("s0lace-counted")){
-  sessionStorage.setItem("s0lace-counted","1")
-  runTransaction(ref(db,"visitors/all"),v=>(v||0)+1)
-  runTransaction(ref(db,"visitors/today/"+today()),v=>(v||0)+1)
-  runTransaction(ref(db,"visitors/week/"+week()),v=>(v||0)+1)
+  sessionStorage.setItem("s0lace-counted", "1");
+  runTransaction(ref(db, "visitors/all"), v => (v || 0) + 1);
+  runTransaction(ref(db, "visitors/today/" + today()), v => (v || 0) + 1);
+  runTransaction(ref(db, "visitors/week/" + week()), v => (v || 0) + 1);
 }
 
-const[a,t,w]=await Promise.all([
-  get(ref(db,"visitors/all")),
-  get(ref(db,"visitors/today/"+today())),
-  get(ref(db,"visitors/week/"+week()))
-])
-
-elAll.textContent=a.val()||0
-elToday.textContent=t.val()||0
-elWeek.textContent=w.val()||0
+const updateCounts = async () => {
+  const [a, t, w] = await Promise.all([
+    get(ref(db, "visitors/all")),
+    get(ref(db, "visitors/today/" + today())),
+    get(ref(db, "visitors/week/" + week()))
+  ]);
+  document.getElementById("vis-all").textContent = a.val() || 0;
+  document.getElementById("vis-today").textContent = t.val() || 0;
+  document.getElementById("vis-week").textContent = w.val() || 0;
+}
+updateCounts();
 </script>
 
 </body>

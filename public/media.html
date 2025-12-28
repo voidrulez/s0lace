@@ -38,11 +38,7 @@
     <main>
       <div class="page-header">
         <h1>MEDIA</h1>
-      </div>   <!-- THIS LINE FIXES THE WHOLE PAGE -->
-
-
-      <!-- SEARCH BAR (HORIZONTAL) -->
-      <div class="games-search-wrap">
+      </div>   <div class="games-search-wrap">
         <span class="search-label">SEARCH &gt;</span>
         <input
           id="media-search"
@@ -52,17 +48,22 @@
         />
       </div>
 
-      <!-- CONTINUE WATCHING -->
-<section class="media-section" id="continue-section" style="display:none;">
-  <h2 class="media-section-title">CONTINUE WATCHING</h2>
-  <div class="media-grid" id="continue-grid"></div>
+      <section class="media-section" id="continue-section" style="display:none;">
+  <div style="display:flex; justify-content:space-between; align-items:center;">
+      <h2 class="media-section-title" style="margin:0;">CONTINUE WATCHING</h2>
+      <button 
+        onclick="clearContinue()" 
+        style="background:transparent; border:1px solid #444; color:#888; cursor:pointer; font-size:9px; padding:4px 8px; font-family:'Press Start 2P';">
+        CLEAR
+      </button>
+  </div>
+  <div class="media-grid" id="continue-grid" style="margin-top:10px;"></div>
 </section>
 
 <hr id="continue-divider"
      style="display:none; border:0; border-top:1px solid #222; margin:20px 0;" />
 
 
-      <!-- MOVIES SECTION -->
       <section class="media-section">
         <h2 class="media-section-title">POPULAR MOVIES</h2>
         <div class="media-grid" id="movies-grid"></div>
@@ -76,7 +77,6 @@
 
       <hr style="border:0; border-top:1px solid #222; margin: 20px 0;" />
 
-      <!-- TV SECTION -->
       <section class="media-section">
         <h2 class="media-section-title">POPULAR SHOWS</h2>
         <div class="media-grid" id="tv-grid"></div>
@@ -105,12 +105,25 @@
 
       // ===== NAV HELPERS =====
 
-      // Movies -> existing mediaplayer.html, using CinemaOS movies
+      // Movies -> Check Settings for Source
       function goToMoviePlayer(tmdbId, title) {
         if (!tmdbId) return;
-        const src =
-          "/scramjet/https://cinemaos.tech/player/" +
-          encodeURIComponent(tmdbId);
+
+        // Get preference from settings (default to cinemaos)
+        const source = localStorage.getItem("s0laceMediaSource") || "cinemaos";
+        
+        let targetUrl = "";
+
+        if (source === "vidfast") {
+            // VidFast embed structure (Proxied)
+            targetUrl = "https://vidfast.pro/embed/movie/" + encodeURIComponent(tmdbId);
+        } else {
+            // CinemaOS embed structure (Proxied)
+            targetUrl = "https://cinemaos.tech/player/" + encodeURIComponent(tmdbId);
+        }
+
+        // Apply Scramjet Proxy
+        const src = "/scramjet/" + targetUrl;
 
         const url =
           "mediaplayer.html?src=" +
@@ -121,6 +134,7 @@
       }
 
       // TV -> tvplayer.html, season/episode handled there
+      // Note: tvplayer.html should ideally check localStorage for source too
       function goToTvPlayer(tmdbId, title, season, episode) {
         if (!tmdbId) return;
         const url =
@@ -397,13 +411,25 @@ function saveContinue(item) {
   localStorage.setItem(CONTINUE_KEY, JSON.stringify(list.slice(0, 12)));
 }
 
+// Function to clear history (Attached to button)
+function clearContinue() {
+  if(!confirm("Clear continue watching history?")) return;
+  localStorage.removeItem(CONTINUE_KEY);
+  renderContinue();
+}
+
 function renderContinue() {
   const grid = document.getElementById("continue-grid");
   const section = document.getElementById("continue-section");
   const divider = document.getElementById("continue-divider");
 
   const items = getContinue();
-  if (!items.length) return;
+  if (!items.length) {
+    section.style.display = "none";
+    divider.style.display = "none";
+    grid.innerHTML = "";
+    return;
+  }
 
   section.style.display = "block";
   divider.style.display = "block";

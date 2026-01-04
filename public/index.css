@@ -1955,5 +1955,37 @@ a.game-card img {
     width: 100%;
     height: auto;
   }
+
+  .game-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0); /* invisible */
+  opacity: 0;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity .25s ease, background .25s ease;
+}
+
+.game-card:hover .game-overlay {
+  opacity: 1;
+  background: rgba(20,20,20,0.45);
+  backdrop-filter: blur(10px);
+}
+
+  .game-thumb {
+  position: relative;
+  background: none !important;
+  padding: 0;
+}
+
+.game-thumb img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 18px;
+}
+
 }
 

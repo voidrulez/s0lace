@@ -1893,3 +1893,39 @@ a.game-card img {
   border-radius: 22px !important;
 }
 
+  /* ===== KILL THE GAME CARD SQUARE COMPLETELY ===== */
+
+.game-card {
+  background: transparent !important;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* this is usually the culprit */
+.game-thumb {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+
+  border-radius: 14px; /* rounded */
+  overflow: hidden;    /* clip image to curve */
+}
+
+/* ensure image matches curve */
+.game-thumb img {
+  border-radius: 14px;
+  display: block;
+}
+
+/* overlay should not add a square */
+.game-overlay {
+  background: linear-gradient(
+    to top,
+    rgba(0,0,0,0.65),
+    rgba(0,0,0,0)
+  ) !important;
+
+  border-radius: 14px;
+}
+

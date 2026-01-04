@@ -4,41 +4,89 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no" />
     <title>S0LACE • Player</title>
-    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+
+    <link rel="shortcut icon" content="favicon.ico" />
     <link rel="stylesheet" href="index.css" />
+    <script src="global-hub.js" defer></script>
+    <script src="register-sw.js" defer></script>
+
     <style>
       body, html {
-        margin: 0; padding: 0; height: 100%;
-        background-color: #0f0f0f; font-family: 'Press Start 2P', cursive;
-        display: flex; overflow: hidden;
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        background-color: #0f0f0f;
+        font-family: sans-serif;
+        display: flex;
+        flex-direction: column;
       }
-      /* Ensure sidebar and main content sit side-by-side */
-      .player-main { 
-        display: flex; flex-direction: column; 
-        height: 100vh; width: 100%; 
-        margin-left: 0; /* Adjust if your index.css sidebar has fixed width */
+
+      /* Main container allows the game to grow while buttons stay at bottom */
+      .player-main {
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+        width: 100%;
       }
+
+      /* Game Container - Rounded corners */
       .player-frame-wrap {
-        flex: 1; margin: 15px 15px 5px 15px;
-        border-radius: 20px; overflow: hidden;
-        background: #000; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        flex: 1; /* Takes up all available space above the button bar */
+        margin: 15px 15px 5px 15px; /* Margin: Top, Right, Bottom, Left */
+        border-radius: 18px; 
+        overflow: hidden;
+        background: #000;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.4);
       }
-      iframe { width: 100%; height: 100%; border: none; display: block; }
+
+      iframe {
+        width: 100%;
+        height: 100%;
+        border: none;
+        display: block;
+      }
+
+      /* Button Bar - Positioned below the game */
       .player-actions {
-        height: 75px; display: flex; align-items: center;
-        padding: 0 25px; gap: 15px; justify-content: flex-start;
+        height: 60px;
+        display: flex;
+        align-items: center;
+        padding: 0 25px;
+        gap: 15px;
       }
+
+      /* Big Rounded Icon-Only Buttons */
       .player-actions button {
-        background: rgba(255, 255, 255, 0.08); color: white;
+        background: rgba(255, 255, 255, 0.08);
+        color: white;
         border: 1px solid rgba(255, 255, 255, 0.15);
-        width: 50px; height: 50px; border-radius: 50%;
-        font-size: 20px; cursor: pointer; transition: 0.2s;
-        display: flex; align-items: center; justify-content: center;
+        width: 45px;
+        height: 45px;
+        border-radius: 50%; /* Circular buttons */
+        font-size: 18px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
       }
-      .player-actions button:hover { background: rgba(255, 255, 255, 0.2); transform: scale(1.1); }
-      .no-src { color: white; text-align: center; font-size: 10px; margin-top: 50px; width: 100%; }
+
+      .player-actions button:hover {
+        background: rgba(255, 255, 255, 0.15);
+        transform: scale(1.05);
+      }
+
+      /* Hide the title info as requested */
+      .player-info { display: none; }
+
+      .no-src {
+        color: white;
+        text-align: center;
+        margin-top: 50px;
+      }
     </style>
   </head>
+
   <body>
     <nav class="side-header">
       <a href="index.html" class="side-icon" data-icon="home"><img></a>
@@ -51,51 +99,89 @@
       <div class="player-frame-wrap" id="frame-wrap">
         <iframe id="media-frame" allowfullscreen></iframe>
       </div>
+
       <div class="player-actions">
         <button type="button" id="reload-btn" title="Reload">↻</button>
         <button type="button" id="fullscreen-btn" title="Fullscreen">⌞⌝</button>
-        <button type="button" id="blank-btn" title="Open Blank">❐</button>
+        <button type="button" id="blank-btn" title="Open in Blank Tab">❐</button>
       </div>
-      <div id="no-src-msg" class="no-src" style="display:none;">NO GAME URL PROVIDED.</div>
+
+      <div class="no-src" id="no-src-msg" style="display: none;">
+        No game URL provided.
+      </div>
     </main>
 
-    <script src="global-hub.js" defer></script>
     <script>
       const params = new URLSearchParams(window.location.search);
       const srcParam = params.get("game");
+
       const frame = document.getElementById("media-frame");
       const wrap = document.getElementById("frame-wrap");
+      const noSrc = document.getElementById("no-src-msg");
       const reloadBtn = document.getElementById("reload-btn");
       const fullscreenBtn = document.getElementById("fullscreen-btn");
       const blankBtn = document.getElementById("blank-btn");
 
+      let originalSrc = null;
+
       if (srcParam) {
-        frame.src = decodeURIComponent(srcParam);
+        originalSrc = decodeURIComponent(srcParam);
+        frame.src = originalSrc;
       } else {
         wrap.style.display = "none";
-        document.getElementById("no-src-msg").style.display = "block";
+        noSrc.style.display = "block";
+        document.querySelector('.player-actions').style.display = "none";
       }
 
-      reloadBtn.addEventListener("click", () => { frame.src = frame.src; });
+      reloadBtn.addEventListener("click", () => {
+        if (originalSrc) frame.src = originalSrc;
+      });
+
+      // About:Blank Cloaking Function (True Fullscreen)
+      blankBtn.addEventListener("click", () => {
+        if (!originalSrc) return;
+        const win = window.open("about:blank", "_blank");
+        if (!win) {
+            alert("Please allow popups for this site");
+            return;
+        }
+        
+        // Setup the new window document
+        const doc = win.document;
+        doc.title = "Classes"; // Sneaky title
+        doc.body.style.margin = "0";
+        doc.body.style.padding = "0";
+        doc.body.style.height = "100vh";
+        doc.body.style.overflow = "hidden";
+
+        const iframe = doc.createElement("iframe");
+        iframe.style.width = "100%";
+        iframe.style.height = "100%";
+        iframe.style.border = "none";
+        iframe.src = originalSrc;
+        
+        doc.body.appendChild(iframe);
+      });
+
+      // Fullscreen Logic
+      function isFullscreen() {
+        return !!(document.fullscreenElement || document.webkitFullscreenElement);
+      }
 
       fullscreenBtn.addEventListener("click", () => {
-        if (!document.fullscreenElement) {
-          wrap.requestFullscreen().catch(err => alert(err.message));
+        // Target the wrap so the rounded corners stay visible in FS if you want, 
+        // or target 'frame' for pure game fullscreen.
+        const target = wrap; 
+        if (!isFullscreen()) {
+          if (target.requestFullscreen) target.requestFullscreen();
+          else if (target.webkitRequestFullscreen) target.webkitRequestFullscreen();
         } else {
-          document.exitFullscreen();
+          if (document.exitFullscreen) document.exitFullscreen();
+          else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
         }
       });
-
-      blankBtn.addEventListener("click", () => {
-        const win = window.open("about:blank", "_blank");
-        const doc = win.document;
-        doc.body.style.margin = "0"; doc.body.style.height = "100vh";
-        const ifr = doc.createElement("iframe");
-        ifr.style = "border:none;width:100%;height:100%;";
-        ifr.src = frame.src;
-        doc.body.appendChild(ifr);
-      });
     </script>
+
     <script>
       function getAccent() { return localStorage.getItem("s0laceAccent") || "gray"; }
       function updateSideIcons() {

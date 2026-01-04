@@ -13,135 +13,26 @@
     <script src="global-hub.js" defer></script>
     <script src="register-sw.js" defer></script>
 
-    <style>
-      /* ===== MEDIA PAGE STYLES ===== */
-      .media-section {
-        margin-top: 24px;
-      }
-
-      .media-section-title {
-        font-size: 11px;
-        color: #b5b5b5;
-        margin-bottom: 12px;
-        letter-spacing: 1px;
-      }
-
-      .media-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-        gap: 14px;
-      }
-
-      /* Media cards (poster + hover) */
-      .media-card {
-        position: relative;
-        text-decoration: none;
-        cursor: pointer;
-      }
-
-      .poster-thumb {
-        position: relative;
-        background: #0b0b0b;
-        border: 1px solid #1f1f1f;
-        overflow: hidden;
-        aspect-ratio: 2/3; /* Enforce poster ratio */
-      }
-
-      .poster-thumb img {
-        width: 100%;
-        height: 100%;
-        display: block;
-        object-fit: cover;
-        image-rendering: crisp-edges;
-      }
-
-      /* Overlay (title on hover) */
-      .media-overlay {
-        position: absolute;
-        inset: 0;
-        background: rgba(0,0,0,0.75);
-        color: #e0e0e0;
-        font-size: 9px;
-        padding: 8px;
-        display: flex;
-        align-items: flex-end;
-        opacity: 0;
-        transition: opacity 0.15s ease;
-        font-family: 'Press Start 2P', monospace;
-        line-height: 1.4;
-      }
-
-      .media-card:hover .media-overlay {
-        opacity: 1;
-      }
-
-      /* Continue Watching section */
-      #continue-section {
-        margin-bottom: 20px;
-      }
-
-      #continue-section h2 {
-        color: #cfcfcf;
-      }
-
-      #continue-grid .media-card {
-        opacity: 0.95;
-      }
-
-      #continue-grid .media-card:hover {
-        opacity: 1;
-      }
-
-      /* Search bar consistency */
-      .games-search-wrap {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        margin: 20px 0;
-      }
-
-      .search-label {
-        font-size: 10px;
-        color: #7a7a7a;
-        white-space: nowrap;
-      }
-
-      #media-search {
-        background: #0b0b0b;
-        border: 1px solid #2a2a2a;
-        color: #e0e0e0;
-        font-family: 'Press Start 2P', monospace;
-        font-size: 9px;
-        padding: 6px 8px;
-        outline: none;
-        flex-grow: 1; /* Ensures it fills space */
-      }
-
-      #media-search::placeholder {
-        color: #555;
-      }
-    </style>
-
   </head>
 
   <body>
     <nav class="side-header">
-      <a href="index.html" class="side-icon" data-icon="home">
-        <img />
-      </a>
+  <a href="index.html" class="side-icon" data-icon="home">
+    <img />
+  </a>
 
-      <a href="games.html" class="side-icon" data-icon="games">
-        <img />
-      </a>
+  <a href="games.html" class="side-icon" data-icon="games">
+    <img />
+  </a>
 
-      <a href="media.html" class="side-icon" data-icon="media">
-        <img />
-      </a>
+  <a href="media.html" class="side-icon" data-icon="media">
+    <img />
+  </a>
 
-      <a href="settings.html" class="side-icon" data-icon="settings">
-        <img />
-      </a>
-    </nav>
+  <a href="settings.html" class="side-icon" data-icon="settings">
+    <img />
+  </a>
+</nav>
 
 
     <main>
@@ -510,132 +401,132 @@
     </script>
 
     <script>
-    /* ===== CONTINUE WATCHING ===== */
-    const CONTINUE_KEY = "s0lace-continue";
+/* ===== CONTINUE WATCHING ===== */
+const CONTINUE_KEY = "s0lace-continue";
 
-    function getContinue() {
-      try {
-        return JSON.parse(localStorage.getItem(CONTINUE_KEY)) || [];
-      } catch {
-        return [];
+function getContinue() {
+  try {
+    return JSON.parse(localStorage.getItem(CONTINUE_KEY)) || [];
+  } catch {
+    return [];
+  }
+}
+
+function saveContinue(item) {
+  let list = getContinue().filter(i => i.id !== item.id);
+  list.unshift(item);
+  localStorage.setItem(CONTINUE_KEY, JSON.stringify(list.slice(0, 12)));
+}
+
+function clearContinue() {
+  if(!confirm("Clear continue watching history?")) return;
+  localStorage.removeItem(CONTINUE_KEY);
+  renderContinue();
+}
+
+function renderContinue() {
+  const grid = document.getElementById("continue-grid");
+  const section = document.getElementById("continue-section");
+  const divider = document.getElementById("continue-divider");
+
+  const items = getContinue();
+  if (!items.length) {
+    section.style.display = "none";
+    divider.style.display = "none";
+    grid.innerHTML = "";
+    return;
+  }
+
+  section.style.display = "block";
+  divider.style.display = "block";
+  grid.innerHTML = "";
+
+  items.forEach(item => {
+    const a = document.createElement("a");
+    a.className = "media-card";
+    a.href = "#";
+
+    a.innerHTML = `
+      <div class="poster-thumb">
+        <img src="${item.poster || "thumbs/placeholder-poster.png"}" />
+        <div class="media-overlay">${item.title}</div>
+      </div>
+    `;
+
+    a.onclick = e => {
+      e.preventDefault();
+      if (item.type === "movie") {
+        goToMoviePlayer(item.id, item.title);
+      } else {
+        goToTvPlayer(item.id, item.title, 1, 1);
       }
-    }
-
-    function saveContinue(item) {
-      let list = getContinue().filter(i => i.id !== item.id);
-      list.unshift(item);
-      localStorage.setItem(CONTINUE_KEY, JSON.stringify(list.slice(0, 12)));
-    }
-
-    function clearContinue() {
-      if(!confirm("Clear continue watching history?")) return;
-      localStorage.removeItem(CONTINUE_KEY);
-      renderContinue();
-    }
-
-    function renderContinue() {
-      const grid = document.getElementById("continue-grid");
-      const section = document.getElementById("continue-section");
-      const divider = document.getElementById("continue-divider");
-
-      const items = getContinue();
-      if (!items.length) {
-        section.style.display = "none";
-        divider.style.display = "none";
-        grid.innerHTML = "";
-        return;
-      }
-
-      section.style.display = "block";
-      divider.style.display = "block";
-      grid.innerHTML = "";
-
-      items.forEach(item => {
-        const a = document.createElement("a");
-        a.className = "media-card";
-        a.href = "#";
-
-        a.innerHTML = `
-          <div class="poster-thumb">
-            <img src="${item.poster || "thumbs/placeholder-poster.png"}" />
-            <div class="media-overlay">${item.title}</div>
-          </div>
-        `;
-
-        a.onclick = e => {
-          e.preventDefault();
-          if (item.type === "movie") {
-            goToMoviePlayer(item.id, item.title);
-          } else {
-            goToTvPlayer(item.id, item.title, 1, 1);
-          }
-        };
-
-        grid.appendChild(a);
-      });
-    }
-
-    /* Inject saving into existing card clicks */
-    const _movie = createMovieCard;
-    createMovieCard = function(movie) {
-      const card = _movie(movie);
-      card.addEventListener("click", () => {
-        saveContinue({
-          id: movie.id,
-          title: movie.title || movie.name,
-          poster: movie.poster_path
-            ? TMDB_IMG_BASE + TMDB_IMG_SIZE + movie.poster_path
-            : null,
-          type: "movie"
-        });
-      });
-      return card;
     };
 
-    const _tv = createTvCard;
-    createTvCard = function(show) {
-      const card = _tv(show);
-      card.addEventListener("click", () => {
-        saveContinue({
-          id: show.id,
-          title: show.name || show.original_name,
-          poster: show.poster_path
-            ? TMDB_IMG_BASE + TMDB_IMG_SIZE + show.poster_path
-            : null,
-          type: "tv"
-        });
-      });
-      return card;
-    };
+    grid.appendChild(a);
+  });
+}
 
-    document.addEventListener("DOMContentLoaded", renderContinue);
-    </script>
+/* Inject saving into existing card clicks */
+const _movie = createMovieCard;
+createMovieCard = function(movie) {
+  const card = _movie(movie);
+  card.addEventListener("click", () => {
+    saveContinue({
+      id: movie.id,
+      title: movie.title || movie.name,
+      poster: movie.poster_path
+        ? TMDB_IMG_BASE + TMDB_IMG_SIZE + movie.poster_path
+        : null,
+      type: "movie"
+    });
+  });
+  return card;
+};
+
+const _tv = createTvCard;
+createTvCard = function(show) {
+  const card = _tv(show);
+  card.addEventListener("click", () => {
+    saveContinue({
+      id: show.id,
+      title: show.name || show.original_name,
+      poster: show.poster_path
+        ? TMDB_IMG_BASE + TMDB_IMG_SIZE + show.poster_path
+        : null,
+      type: "tv"
+    });
+  });
+  return card;
+};
+
+document.addEventListener("DOMContentLoaded", renderContinue);
+</script>
 
 
     <script>
-    function getAccent() {
-      return localStorage.getItem("s0laceAccent") || "gray";
-    }
+function getAccent() {
+  return localStorage.getItem("s0laceAccent") || "gray";
+}
 
-    function updateSideIcons() {
-      const accent = getAccent();
+function updateSideIcons() {
+  const accent = getAccent();
 
-      document.querySelectorAll(".side-icon").forEach(link => {
-        const icon = link.dataset.icon;
-        const img = link.querySelector("img");
+  document.querySelectorAll(".side-icon").forEach(link => {
+    const icon = link.dataset.icon;
+    const img = link.querySelector("img");
 
-        const isActive =
-          location.pathname.endsWith(link.getAttribute("href"));
+    const isActive =
+      location.pathname.endsWith(link.getAttribute("href"));
 
-        link.classList.toggle("active", isActive);
+    link.classList.toggle("active", isActive);
 
-        img.src = `thumbs/${icon}/${isActive ? accent : "gray"}.png`;
-      });
-    }
+    img.src = `thumbs/${icon}/${isActive ? accent : "gray"}.png`;
+  });
+}
 
-    updateSideIcons();
-    window.addEventListener("storage", updateSideIcons);
-    </script>
+updateSideIcons();
+window.addEventListener("storage", updateSideIcons);
+</script>
 
   </body>
 </html>

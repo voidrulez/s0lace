@@ -5,13 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no" />
     <title>S0LACE • Player</title>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="index.css" />
     <style>
       body, html {
         margin: 0; padding: 0; height: 100%;
         background-color: #0f0f0f; font-family: 'Press Start 2P', cursive;
-        display: flex; flex-direction: column; overflow: hidden;
+        display: flex; overflow: hidden;
       }
-      .player-main { display: flex; flex-direction: column; height: 100vh; width: 100%; }
+      /* Ensure sidebar and main content sit side-by-side */
+      .player-main { 
+        display: flex; flex-direction: column; 
+        height: 100vh; width: 100%; 
+        margin-left: 0; /* Adjust if your index.css sidebar has fixed width */
+      }
       .player-frame-wrap {
         flex: 1; margin: 15px 15px 5px 15px;
         border-radius: 20px; overflow: hidden;
@@ -19,8 +25,8 @@
       }
       iframe { width: 100%; height: 100%; border: none; display: block; }
       .player-actions {
-        height: 70px; display: flex; align-items: center;
-        padding: 0 20px; gap: 12px; justify-content: flex-start; /* Aligned Left */
+        height: 75px; display: flex; align-items: center;
+        padding: 0 25px; gap: 15px; justify-content: flex-start;
       }
       .player-actions button {
         background: rgba(255, 255, 255, 0.08); color: white;
@@ -30,35 +36,56 @@
         display: flex; align-items: center; justify-content: center;
       }
       .player-actions button:hover { background: rgba(255, 255, 255, 0.2); transform: scale(1.1); }
-      .no-src { color: white; text-align: center; font-size: 12px; margin-top: 50px; line-height: 2; }
+      .no-src { color: white; text-align: center; font-size: 10px; margin-top: 50px; width: 100%; }
     </style>
   </head>
   <body>
+    <nav class="side-header">
+      <a href="index.html" class="side-icon" data-icon="home"><img></a>
+      <a href="games.html" class="side-icon" data-icon="games"><img></a>
+      <a href="media.html" class="side-icon" data-icon="media"><img></a>
+      <a href="settings.html" class="side-icon" data-icon="settings"><img></a>
+    </nav>
+
     <main class="player-main">
       <div class="player-frame-wrap" id="frame-wrap">
         <iframe id="media-frame" allowfullscreen></iframe>
       </div>
       <div class="player-actions">
         <button type="button" id="reload-btn" title="Reload">↻</button>
+        <button type="button" id="fullscreen-btn" title="Fullscreen">⌞⌝</button>
         <button type="button" id="blank-btn" title="Open Blank">❐</button>
       </div>
       <div id="no-src-msg" class="no-src" style="display:none;">NO GAME URL PROVIDED.</div>
     </main>
+
+    <script src="global-hub.js" defer></script>
     <script>
       const params = new URLSearchParams(window.location.search);
       const srcParam = params.get("game");
       const frame = document.getElementById("media-frame");
+      const wrap = document.getElementById("frame-wrap");
       const reloadBtn = document.getElementById("reload-btn");
+      const fullscreenBtn = document.getElementById("fullscreen-btn");
       const blankBtn = document.getElementById("blank-btn");
 
       if (srcParam) {
         frame.src = decodeURIComponent(srcParam);
       } else {
-        document.getElementById("frame-wrap").style.display = "none";
+        wrap.style.display = "none";
         document.getElementById("no-src-msg").style.display = "block";
       }
 
       reloadBtn.addEventListener("click", () => { frame.src = frame.src; });
+
+      fullscreenBtn.addEventListener("click", () => {
+        if (!document.fullscreenElement) {
+          wrap.requestFullscreen().catch(err => alert(err.message));
+        } else {
+          document.exitFullscreen();
+        }
+      });
+
       blankBtn.addEventListener("click", () => {
         const win = window.open("about:blank", "_blank");
         const doc = win.document;
@@ -68,6 +95,21 @@
         ifr.src = frame.src;
         doc.body.appendChild(ifr);
       });
+    </script>
+    <script>
+      function getAccent() { return localStorage.getItem("s0laceAccent") || "gray"; }
+      function updateSideIcons() {
+        const accent = getAccent();
+        document.querySelectorAll(".side-icon").forEach(link => {
+          const icon = link.dataset.icon;
+          const img = link.querySelector("img");
+          const isActive = location.pathname.endsWith(link.getAttribute("href"));
+          link.classList.toggle("active", isActive);
+          img.src = `thumbs/${icon}/${isActive ? accent : "gray"}.png`;
+        });
+      }
+      updateSideIcons();
+      window.addEventListener("storage", updateSideIcons);
     </script>
   </body>
 </html>

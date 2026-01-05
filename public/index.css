@@ -2114,3 +2114,19 @@ a.game-card img {
     text-decoration: none;
     border: none;
 }
+
+  a.game-card {
+    /* REMOVES THE GREY LINE BOX */
+    border: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    outline: none !important;
+
+    /* ADDS THE CURVES */
+    border-radius: 20px !important; /* Adjust this number for more/less curve */
+    overflow: hidden !important;    /* Forces the image inside to respect the curve */
+    
+    /* PREVENTS WEIRD LINK BEHAVIOR */
+    display: block; 
+    text-decoration: none !important;
+}

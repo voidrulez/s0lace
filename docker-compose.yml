@@ -10,3 +10,5 @@
 # networks:
 #   default:
 #     name: ultraviolet
+env:
+  GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}

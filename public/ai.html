@@ -24,6 +24,7 @@
         font-family: sans-serif;
       }
 
+      /* FULL SCREEN CHAT SHELL */
       .chat-shell {
         flex: 1;
         margin: 15px;
@@ -45,6 +46,10 @@
         gap: 15px;
         scroll-behavior: smooth;
       }
+
+      /* SCROLLBAR STYLING */
+      #chat-history::-webkit-scrollbar { width: 6px; }
+      #chat-history::-webkit-scrollbar-thumb { background: #222; border-radius: 10px; }
 
       .message {
         max-width: 85%;
@@ -142,9 +147,9 @@
     <main class="player-main">
       <div class="chat-shell">
         <div id="chat-history"></div>
-        <div id="ai-status" class="ai-loading">THINKING...</div>
+        <div id="ai-status" class="ai-loading">GEMINI 2.5 THINKING...</div>
         <div class="chat-input-area">
-          <input type="text" id="user-input" placeholder="Ask Gemini something..." autocomplete="off">
+          <input type="text" id="user-input" placeholder="Ask Gemini something (or type /clear)..." autocomplete="off">
           <button id="send-btn">SEND</button>
         </div>
       </div>
@@ -157,7 +162,8 @@
     <script>
       // === CONFIGURATION ===
       const GEMINI_API_KEY = "AIzaSyDEGQ7l66MwgwRVwwfDAszj4f82mYgfHpo";
-      const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+      // Updated to 2.5 Flash
+      const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`;
 
       const chatHistoryContainer = document.getElementById('chat-history');
       const userInput = document.getElementById('user-input');
@@ -165,12 +171,11 @@
       const clearBtn = document.getElementById('clear-btn');
       const aiStatus = document.getElementById('ai-status');
 
-      // State Memory
       let sessionMessages = JSON.parse(localStorage.getItem('solace_chat_history')) || [];
 
       function initChat() {
         if (sessionMessages.length === 0) {
-          addMessage("Hello. Im S0LACE AI. How can I help?", 'ai-message', false);
+          renderMessage("Hello. Im S0LACE AI 2.5. How can I help?", 'ai-message');
         } else {
           sessionMessages.forEach(msg => {
             renderMessage(msg.text, msg.role === 'user' ? 'user-message' : 'ai-message');
@@ -178,15 +183,28 @@
         }
       }
 
+      function clearChat() {
+        localStorage.removeItem('solace_chat_history');
+        sessionMessages = [];
+        chatHistoryContainer.innerHTML = '';
+        renderMessage("Memory cleared. I'm ready for a new topic.", 'ai-message');
+      }
+
       async function askAI() {
         const text = userInput.value.trim();
         if (!text) return;
+
+        // Check for /clear command
+        if (text.toLowerCase() === '/clear') {
+          userInput.value = '';
+          clearChat();
+          return;
+        }
 
         addMessage(text, 'user-message', true);
         userInput.value = '';
         aiStatus.style.display = 'block';
 
-        // Prepare context for Gemini (Memory)
         const contents = sessionMessages.map(m => ({
           role: m.role === 'user' ? 'user' : 'model',
           parts: [{ text: m.text }]
@@ -230,12 +248,7 @@
 
       sendBtn.addEventListener('click', askAI);
       userInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') askAI(); });
-      clearBtn.addEventListener('click', () => {
-        localStorage.removeItem('solace_chat_history');
-        sessionMessages = [];
-        chatHistoryContainer.innerHTML = '';
-        addMessage("Memory cleared. I'm ready for a new topic.", 'ai-message', false);
-      });
+      clearBtn.addEventListener('click', clearChat);
 
       // Sidebar Logic
       function getAccent() { return localStorage.getItem("s0laceAccent") || "gray"; }

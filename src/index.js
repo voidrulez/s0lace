@@ -8,7 +8,9 @@ import fastifyStatic from "@fastify/static";
 import { scramjetPath } from "@mercuryworkshop/scramjet/path";
 import { epoxyPath } from "@mercuryworkshop/epoxy-transport";
 import { baremuxPath } from "@mercuryworkshop/bare-mux/node";
+import { handleAI } from "./ai.js";
 
+app.post("/api/ai", handleAI);
 const publicPath = fileURLToPath(new URL("../public/", import.meta.url));
 
 // Wisp Configuration

@@ -31,6 +31,7 @@ https://s0lace.fly.dev
 
 ## 🚀 Quick Deploy (Free Options)
 ## **NOTE:** S0LACE Cannot be hosted as a static site on sites such as Vercel, Github Pages, Netfliy, etc.
+[![Deploy to Render](https://binbashbanana.github.io/deploy-buttons/buttons/remade/render.svg)](https://render.com/deploy?repo=https://github.com/granthhss0/S0LACE)
 ### 1. Render (Recommended – Free tier)
 1. Fork this repo
 2. Go to [render.com](https://render.com) → New Web Service

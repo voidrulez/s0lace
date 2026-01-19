@@ -3,7 +3,7 @@ importScripts('/scram/scramjet.all.js');
 const { ScramjetServiceWorker } = $scramjetLoadWorker();
 const scramjet = new ScramjetServiceWorker();
 
-// 1. FIX: Claim clients immediately (Solves "Works on reload but not first time")
+// 1. ADDED: Force immediate activation (Fixes "Invalid URL" / Reload issue)
 self.addEventListener('install', (event) => {
   self.skipWaiting();
 });
@@ -12,42 +12,42 @@ self.addEventListener('activate', (event) => {
   event.waitUntil(clients.claim());
 });
 
-// 2. Main Fetch Handler
 self.addEventListener("fetch", event => {
   const req = event.request;
-  const url = new URL(req.url); // Use URL object for safer parsing
-
-  // 🔴 HARD BYPASS — do NOT touch non-http/https
+  const url = req.url; 
+  
+  // 🔴 HARD BYPASS — do NOT touch these
   if (
-    !req.url.startsWith("http://") &&
-    !req.url.startsWith("https://")
+    !url.startsWith("http://") &&
+    !url.startsWith("https://")
   ) return;
 
-  // 🔴 Adblock / Tracker Bypass
   if (
-    url.hostname.includes("googlesyndication.com") ||
-    url.hostname.includes("doubleclick.net") ||
-    url.hostname.includes("googleadservices.com") ||
-    url.hostname.includes("adtrafficquality.google")
+    url.includes("googlesyndication.com") ||
+    url.includes("doubleclick.net") ||
+    url.includes("googleadservices.com") ||
+    url.includes("adtrafficquality.google")
   ) {
-    return; // let browser handle it (or block it naturally)
+    return; // let browser handle it
   }
 
-  // 🔴 Already proxied or internal — DO NOT rewrap
-  // (Prevents infinite loops if scramjet calls itself)
-  if (url.pathname.includes("/scramjet/")) {
+  // 🔴 Already proxied — DO NOT rewrap
+  if (url.includes("/scramjet/")) {
     return;
   }
 
-  // 🔴 TMDB Bypass (Images)
-  if (url.hostname === 'image.tmdb.org') {
-    return; // Standard fetch, no respondWith needed for bypass
+  // FIXED: Added URL object so .hostname works below
+  const urlObj = new URL(url);
+
+  // Let TMDB images bypass Scramjet cleanly
+  if (urlObj.hostname === 'image.tmdb.org') {
+    // Return undefined to let browser handle fetch naturally
+    return;
   }
 
-  // 3. THE PROXY LOGIC (Wrapped safely)
+  // FIXED: Removed the split syntax and combined into one respondWith
   event.respondWith((async () => {
     try {
-      // Load config safely
       await scramjet.loadConfig();
 
       if (scramjet.route(event)) {
@@ -56,8 +56,9 @@ self.addEventListener("fetch", event => {
 
       return fetch(event.request);
     } catch (err) {
-      console.error('[Scramjet SW] Config error (DB corrupt?), passing through:', err);
-      // Fallback to network if proxy fails (prevents white screen)
+      console.error('[Scramjet SW] Fatal error, resetting:', err);
+
+      // HARD fallback — don't partially proxy
       return fetch(event.request);
     }
   })());

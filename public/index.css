@@ -115,6 +115,7 @@
   display: block;
 }
 
+#game-search,
 #media-search {
   border-radius: 14px !important;
   background: rgba(0,0,0,0.45);

@@ -178,7 +178,11 @@
           return;
         }
 
-        const originalSrc = srcParam;
+        const originalSrc =
+  srcParam.startsWith("/scramjet/")
+    ? srcParam
+    : "/scramjet/" + srcParam;
+
 
         /* --- BAREMUX / PROXY INIT --- */
         try {
